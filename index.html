@@ -3944,7 +3944,7 @@ function GamesPage() {
 
   const gameList=[
     {id:'space',  icon:'🚀',title:'Space Defender', desc:'Wave-based arcade shooter — blast invaders, dodge fire, survive the swarm!', color:'#00d4ff'},
-    {id:'snake',  icon:'🐍',title:'Snake Run',      desc:'Classic snake with a neon glow. Eat, grow, don\'t bite yourself!',            color:'#39ff14'},
+    {id:'snake',  icon:'🐍',title:'Snake Run',      desc:'Classic snake with a neon glow. Eat, grow, don't bite yourself!',            color:'#39ff14'},
     {id:'ludo',    icon:'🎲',title:'Ludo Quest',     desc:'Classic Ludo with D&D dungeon style. Roll dice, move pieces, race to win!',  color:'#b44dff'},
     {id:'memory',  icon:'🃏',title:'Memory Duel',    desc:'Race the AI to match all card pairs. It remembers what it has seen!',         color:'#00d4ff'},
     {id:'tictac',  icon:'⭕',title:'Tic-Tac-Toe',    desc:'Play against the AI. It uses perfect minimax strategy — can you win?',       color:'#39ff14'},
@@ -4026,7 +4026,7 @@ function ludoApplyMove(player, local, diceVal, pieces){
         next.forEach(pc=>{
           if(pc.player!==player && pc.pos>=0 && pc.pos<48 && ludoAbs(pc.player,pc.pos)===ai){
             pc.pos=-1;
-            logs.push(`💥 ${LUDO_PLAYERS[player].name} captured ${LUDO_PLAYERS[pc.player].name}\'s piece!`);
+            logs.push(`💥 ${LUDO_PLAYERS[player].name} captured ${LUDO_PLAYERS[pc.player].name}'s piece!`);
           }
         });
       }
@@ -4164,7 +4164,7 @@ function LudoGame({onBack}) {
   const resetGame=()=>{
     aiRunning.current=false;
     setPieces(initPieces()); setTurn(0); setDice(null); setOver(null); setNoMove(false);
-    setLog([\'🎲 Your turn! Roll the dice.\']);
+    setLog(['🎲 Your turn! Roll the dice.']);
   };
 
   const myValidLocals=(turn===0&&dice&&!rolling&&over===null)?ludoValidMoves(0,dice,pieces):[];
@@ -4184,61 +4184,61 @@ function LudoGame({onBack}) {
   return (
     <div>
       <button className="btn btn-ghost btn-sm" onClick={onBack} style={{marginBottom:14}}>← Back</button>
-      <div style={{display:\'flex\',gap:18,flexWrap:\'wrap\',alignItems:\'flex-start\'}}>
+      <div style={{display:'flex',gap:18,flexWrap:'wrap',alignItems:'flex-start'}}>
         {/* Board */}
-        <div style={{background:\'linear-gradient(135deg,#1a0a2e,#0a1428)\',borderRadius:\'var(--r-lg)\',padding:14,border:\'2px solid rgba(180,77,255,0.4)\',boxShadow:\'0 0 40px rgba(180,77,255,0.15)\'}}>
-          <div style={{fontFamily:\'var(--font-g)\',fontWeight:700,fontSize:13,color:\'#b44dff\',marginBottom:10,textAlign:\'center\'}}>⚔ LUDO QUEST</div>
-          <div style={{display:\'grid\',gridTemplateColumns:`repeat(13,${CELL}px)`,gridTemplateRows:`repeat(13,${CELL}px)`,gap:1,background:\'rgba(255,255,255,0.06)\',padding:4,borderRadius:8}}>
+        <div style={{background:'linear-gradient(135deg,#1a0a2e,#0a1428)',borderRadius:'var(--r-lg)',padding:14,border:'2px solid rgba(180,77,255,0.4)',boxShadow:'0 0 40px rgba(180,77,255,0.15)'}}>
+          <div style={{fontFamily:'var(--font-g)',fontWeight:700,fontSize:13,color:'#b44dff',marginBottom:10,textAlign:'center'}}>⚔ LUDO QUEST</div>
+          <div style={{display:'grid',gridTemplateColumns:`repeat(13,${CELL}px)`,gridTemplateRows:`repeat(13,${CELL}px)`,gap:1,background:'rgba(255,255,255,0.06)',padding:4,borderRadius:8}}>
             {boardCells.map(({r,c})=>{
               const key=`${r},${c}`;
               const ringIdx=LUDO_RING_MAP[key];
-              let type=\'filler\', playerArea=null;
-              if(ringIdx!==undefined) type=\'ring\';
-              else if(r>=5&&r<=7&&c>=5&&c<=7) type=\'center\';
-              else LUDO_BASE_AREAS.forEach((b,pi)=>{ if(r>=b.r0&&r<b.r0+4&&c>=b.c0&&c<b.c0+4){type=\'base\';playerArea=pi;} });
+              let type='filler', playerArea=null;
+              if(ringIdx!==undefined) type='ring';
+              else if(r>=5&&r<=7&&c>=5&&c<=7) type='center';
+              else LUDO_BASE_AREAS.forEach((b,pi)=>{ if(r>=b.r0&&r<b.r0+4&&c>=b.c0&&c<b.c0+4){type='base';playerArea=pi;} });
 
-              if(type===\'filler\') return <div key={key} style={{background:\'rgba(0,0,0,0.2)\',borderRadius:2}}/>;
+              if(type==='filler') return <div key={key} style={{background:'rgba(0,0,0,0.2)',borderRadius:2}}/>;
 
-              if(type===\'ring\'){
+              if(type==='ring'){
                 const safeFor=LUDO_START.indexOf(ringIdx);
-                const bg=safeFor>=0?LUDO_PLAYERS[safeFor].color+\'28\':\'rgba(255,255,255,0.07)\';
-                const bdr=safeFor>=0?`1px solid ${LUDO_PLAYERS[safeFor].color}66`:\'1px solid rgba(255,255,255,0.06)\';
+                const bg=safeFor>=0?LUDO_PLAYERS[safeFor].color+'28':'rgba(255,255,255,0.07)';
+                const bdr=safeFor>=0?`1px solid ${LUDO_PLAYERS[safeFor].color}66`:'1px solid rgba(255,255,255,0.06)';
                 const occupants=piecesByRing[ringIdx]||[];
                 return (
-                  <div key={key} style={{background:bg,border:bdr,borderRadius:2,display:\'flex\',alignItems:\'center\',justifyContent:\'center\',flexWrap:\'wrap\',gap:1,padding:1}}>
+                  <div key={key} style={{background:bg,border:bdr,borderRadius:2,display:'flex',alignItems:'center',justifyContent:'center',flexWrap:'wrap',gap:1,padding:1}}>
                     {occupants.length===0 && safeFor>=0 && <span style={{fontSize:8,color:LUDO_PLAYERS[safeFor].color,opacity:0.7}}>★</span>}
                     {occupants.map((pc,i)=>{
                       const clickable=pc.player===0&&myValidLocals.includes(pc.local);
                       return <div key={i} onClick={()=>clickable&&movePiece(pc.local)}
-                        style={{width:CELL/2-2,height:CELL/2-2,borderRadius:\'50%\',background:LUDO_PLAYERS[pc.player].color,border:\'1px solid rgba(255,255,255,0.8)\',cursor:clickable?\'pointer\':\'default\',boxShadow:clickable?`0 0 5px 2px ${LUDO_PLAYERS[pc.player].color}`:\'none\',animation:clickable?\'pulse 0.8s ease-in-out infinite\':\'none\'}}/>;
+                        style={{width:CELL/2-2,height:CELL/2-2,borderRadius:'50%',background:LUDO_PLAYERS[pc.player].color,border:'1px solid rgba(255,255,255,0.8)',cursor:clickable?'pointer':'default',boxShadow:clickable?`0 0 5px 2px ${LUDO_PLAYERS[pc.player].color}`:'none',animation:clickable?'pulse 0.8s ease-in-out infinite':'none'}}/>;
                     })}
                   </div>
                 );
               }
 
-              if(type===\'center\'){
+              if(type==='center'){
                 const isMid=r===6&&c===6;
-                if(isMid) return <div key={key} style={{background:\'rgba(255,215,0,0.15)\',border:\'1px solid rgba(255,215,0,0.4)\',borderRadius:2,display:\'flex\',alignItems:\'center\',justifyContent:\'center\',fontSize:14}}>🏆</div>;
+                if(isMid) return <div key={key} style={{background:'rgba(255,215,0,0.15)',border:'1px solid rgba(255,215,0,0.4)',borderRadius:2,display:'flex',alignItems:'center',justifyContent:'center',fontSize:14}}>🏆</div>;
                 const qi=(r-5)*3+(c-5);
                 const qMap=[0,1,null,3,null,null,null,2,null];
                 const pIdx=qMap[qi];
                 const homeCount=pIdx!==null?(piecesByHome[pIdx]||[]).length:0;
-                return <div key={key} style={{background:pIdx!==null?LUDO_PLAYERS[pIdx].color+\'22\':\'rgba(255,255,255,0.04)\',border:\'1px solid rgba(255,255,255,0.06)\',borderRadius:2,display:\'flex\',alignItems:\'center\',justifyContent:\'center\',fontSize:9,color:pIdx!==null?LUDO_PLAYERS[pIdx].color:\'transparent\'}}>
-                  {homeCount>0?\'★\'.repeat(homeCount):\'\'}
+                return <div key={key} style={{background:pIdx!==null?LUDO_PLAYERS[pIdx].color+'22':'rgba(255,255,255,0.04)',border:'1px solid rgba(255,255,255,0.06)',borderRadius:2,display:'flex',alignItems:'center',justifyContent:'center',fontSize:9,color:pIdx!==null?LUDO_PLAYERS[pIdx].color:'transparent'}}>
+                  {homeCount>0?'★'.repeat(homeCount):''}
                 </div>;
               }
 
-              if(type===\'base\'){
+              if(type==='base'){
                 const b=LUDO_BASE_AREAS[playerArea];
                 const lr=r-b.r0, lc=c-b.c0;
-                const slotMap={\'1,1\':0,\'1,2\':1,\'2,1\':2,\'2,2\':3};
+                const slotMap={'1,1':0,'1,2':1,'2,1':2,'2,2':3};
                 const slot=slotMap[`${lr},${lc}`];
                 const pc=slot!==undefined?piecesByBase[playerArea].find(p=>p.local===slot):null;
                 const isEdge=lr===0||lr===3||lc===0||lc===3;
                 const clickable=pc&&pc.player===0&&myValidLocals.includes(pc.local);
-                return <div key={key} style={{background:isEdge?LUDO_PLAYERS[playerArea].color+\'22\':LUDO_PLAYERS[playerArea].color+\'11\',border:`1px solid ${LUDO_PLAYERS[playerArea].color}30`,borderRadius:2,display:\'flex\',alignItems:\'center\',justifyContent:\'center\'}}>
+                return <div key={key} style={{background:isEdge?LUDO_PLAYERS[playerArea].color+'22':LUDO_PLAYERS[playerArea].color+'11',border:`1px solid ${LUDO_PLAYERS[playerArea].color}30`,borderRadius:2,display:'flex',alignItems:'center',justifyContent:'center'}}>
                   {pc&&<div onClick={()=>clickable&&movePiece(pc.local)}
-                    style={{width:CELL*0.6,height:CELL*0.6,borderRadius:\'50%\',background:LUDO_PLAYERS[playerArea].color,border:\'1.5px solid rgba(255,255,255,0.8)\',cursor:clickable?\'pointer\':\'default\',boxShadow:clickable?`0 0 7px 2px ${LUDO_PLAYERS[playerArea].color}`:\'none\',animation:clickable?\'pulse 0.8s ease-in-out infinite\':\'none\'}}/>}
+                    style={{width:CELL*0.6,height:CELL*0.6,borderRadius:'50%',background:LUDO_PLAYERS[playerArea].color,border:'1.5px solid rgba(255,255,255,0.8)',cursor:clickable?'pointer':'default',boxShadow:clickable?`0 0 7px 2px ${LUDO_PLAYERS[playerArea].color}`:'none',animation:clickable?'pulse 0.8s ease-in-out infinite':'none'}}/>}
                 </div>;
               }
               return <div key={key}/>;
@@ -4246,34 +4246,34 @@ function LudoGame({onBack}) {
           </div>
 
           {/* Dice */}
-          <div style={{textAlign:\'center\',marginTop:12}}>
-            <div onClick={rollDice} style={{display:\'inline-flex\',alignItems:\'center\',justifyContent:\'center\',width:52,height:52,background:rolling?\'rgba(255,221,0,0.18)\':\'rgba(255,255,255,0.08)\',border:`2px solid ${noMove?\'#ff5050\':turn===0&&!dice&&!rolling?\'rgba(255,221,0,0.7)\':\'rgba(255,255,255,0.25)\'}`,borderRadius:12,cursor:turn===0&&!rolling&&!dice&&over===null?\'pointer\':\'default\',fontSize:28,transition:\'all 0.15s\',boxShadow:turn===0&&!dice&&!rolling?\'0 0 18px rgba(255,221,0,0.35)\':\'none\'}}>
-              {dice?[\'⚀\',\'⚁\',\'⚂\',\'⚃\',\'⚄\',\'⚅\'][dice-1]:\'🎲\'}
+          <div style={{textAlign:'center',marginTop:12}}>
+            <div onClick={rollDice} style={{display:'inline-flex',alignItems:'center',justifyContent:'center',width:52,height:52,background:rolling?'rgba(255,221,0,0.18)':'rgba(255,255,255,0.08)',border:`2px solid ${noMove?'#ff5050':turn===0&&!dice&&!rolling?'rgba(255,221,0,0.7)':'rgba(255,255,255,0.25)'}`,borderRadius:12,cursor:turn===0&&!rolling&&!dice&&over===null?'pointer':'default',fontSize:28,transition:'all 0.15s',boxShadow:turn===0&&!dice&&!rolling?'0 0 18px rgba(255,221,0,0.35)':'none'}}>
+              {dice?['⚀','⚁','⚂','⚃','⚄','⚅'][dice-1]:'🎲'}
             </div>
-            <div style={{fontSize:11,color:\'rgba(255,255,255,0.45)\',marginTop:5}}>
-              {over!==null?\'\':turn===0?(dice?(myValidLocals.length?\'Tap glowing piece\':\'Pass...\'):(rolling?\'Rolling…\':\'Click die to roll\')):LUDO_PLAYERS[turn].name+\' thinking…\'}
+            <div style={{fontSize:11,color:'rgba(255,255,255,0.45)',marginTop:5}}>
+              {over!==null?'':turn===0?(dice?(myValidLocals.length?'Tap glowing piece':'Pass...'):(rolling?'Rolling…':'Click die to roll')):LUDO_PLAYERS[turn].name+' thinking…'}
             </div>
           </div>
-          {over!==null&&<div style={{textAlign:\'center\',marginTop:10}}>
-            <div style={{fontFamily:\'var(--font-g)\',color:\'gold\',marginBottom:8,fontSize:14}}>{over===0?\'🏆 YOU WIN! 🏆\':LUDO_PLAYERS[over].name+\' wins!\'}</div>
+          {over!==null&&<div style={{textAlign:'center',marginTop:10}}>
+            <div style={{fontFamily:'var(--font-g)',color:'gold',marginBottom:8,fontSize:14}}>{over===0?'🏆 YOU WIN! 🏆':LUDO_PLAYERS[over].name+' wins!'}</div>
             <button className="btn btn-primary btn-sm" onClick={resetGame}>Play Again</button>
           </div>}
         </div>
 
         {/* Side panel */}
         <div style={{flex:1,minWidth:200}}>
-          <div style={{background:\'var(--surface)\',borderRadius:\'var(--r)\',border:\'1.5px solid var(--border)\',padding:12,maxHeight:260,overflowY:\'auto\',marginBottom:12}}>
+          <div style={{background:'var(--surface)',borderRadius:'var(--r)',border:'1.5px solid var(--border)',padding:12,maxHeight:260,overflowY:'auto',marginBottom:12}}>
             <div style={{fontWeight:700,fontSize:12,marginBottom:8}}>📜 Log</div>
-            {log.map((l,i)=><div key={i} style={{padding:\'4px 0\',borderBottom:\'1px solid var(--border)\',fontSize:11.5,color:\'var(--text2)\',opacity:Math.max(0.3,1-i*0.08)}}>{l}</div>)}
+            {log.map((l,i)=><div key={i} style={{padding:'4px 0',borderBottom:'1px solid var(--border)',fontSize:11.5,color:'var(--text2)',opacity:Math.max(0.3,1-i*0.08)}}>{l}</div>)}
           </div>
           {LUDO_PLAYERS.map((pl,i)=>(
-            <div key={i} style={{display:\'flex\',alignItems:\'center\',gap:8,padding:\'7px 10px\',background:turn===i&&over===null?\'color-mix(in srgb,\'+pl.color+\' 12%, var(--surface))\':\'var(--surface)\',borderRadius:10,marginBottom:5,border:`1.5px solid ${turn===i&&over===null?pl.color:\'var(--border)\'}`}}>
-              <span style={{width:10,height:10,borderRadius:\'50%\',background:pl.color,display:\'inline-block\'}}/>
+            <div key={i} style={{display:'flex',alignItems:'center',gap:8,padding:'7px 10px',background:turn===i&&over===null?'color-mix(in srgb,'+pl.color+' 12%, var(--surface))':'var(--surface)',borderRadius:10,marginBottom:5,border:`1.5px solid ${turn===i&&over===null?pl.color:'var(--border)'}`}}>
+              <span style={{width:10,height:10,borderRadius:'50%',background:pl.color,display:'inline-block'}}/>
               <span style={{fontWeight:600,fontSize:12}}>{pl.name}</span>
-              <span style={{marginLeft:\'auto\',fontSize:11,color:\'var(--text3)\'}}>{pieces.filter(pc=>pc.player===i&&pc.pos===48).length}/4 🏠</span>
+              <span style={{marginLeft:'auto',fontSize:11,color:'var(--text3)'}}>{pieces.filter(pc=>pc.player===i&&pc.pos===48).length}/4 🏠</span>
             </div>
           ))}
-          <div style={{marginTop:10,fontSize:11,color:\'var(--text3)\',padding:\'8px 10px\',background:\'var(--surface2)\',borderRadius:10,lineHeight:1.7}}>
+          <div style={{marginTop:10,fontSize:11,color:'var(--text3)',padding:'8px 10px',background:'var(--surface2)',borderRadius:10,lineHeight:1.7}}>
             🎲 <strong>6</strong> = enter base or go again<br/>★ Start cells = safe from capture
           </div>
         </div>
@@ -4396,7 +4396,7 @@ function TicTacToe({onBack}) {
     if(!xIsNext||board[i]||over)return;
     const nb=[...board];nb[i]='X';setBoard(nb);
     const w=calcWinner(nb),draw=!w&&nb.every(c=>c);
-    if(w==='X'){setScores(s=>({...s,player:s.player+1}));setOver(true);setAiMsg(['Wait...I lost?! Bug! 🤔','Beginner\'s luck!','Well played... I demand rematch!'][Math.floor(Math.random()*3)]);}
+    if(w==='X'){setScores(s=>({...s,player:s.player+1}));setOver(true);setAiMsg(['Wait...I lost?! Bug! 🤔','Beginner's luck!','Well played... I demand rematch!'][Math.floor(Math.random()*3)]);}
     else if(draw){setScores(s=>({...s,draws:s.draws+1}));setOver(true);setAiMsg('Draw! Even match! 🤝');}
     else setXIsNext(false);
   };
@@ -5703,7 +5703,7 @@ function AuthScreen({onEnter}) {
           <div style={{fontFamily:'Nunito,sans-serif',fontWeight:900,fontSize:22,color:'white',marginBottom:8}}>🔥 Connect Firebase</div>
           <div style={{fontSize:13,color:'rgba(255,255,255,0.6)',marginBottom:16,lineHeight:1.7}}>
             1. Go to <a href="https://console.firebase.google.com" target="_blank" rel="noreferrer" style={{color:'#6ba362'}}>console.firebase.google.com</a> → Create Project<br/>
-            2. Add a Web App (click the </> icon)<br/>
+            2. Add a Web App (click the {'</>'} icon)<br/>
             3. Copy the <code style={{color:'#a8d8a8'}}>firebaseConfig</code> object<br/>
             4. Paste it below<br/>
             5. Enable <strong>Authentication</strong> (Email/Password + Google), <strong>Firestore</strong>, and <strong>Storage</strong> in the Firebase console

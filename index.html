@@ -14,11 +14,11 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-storage-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
 <!-- Three.js for 3D Garden Park -->
-<script src="https://unpkg.com/three@0.160.0/build/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
 <!-- React -->
-<script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-<script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/react@18.3.1/umd/react.production.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/react-dom@18.3.1/umd/react-dom.production.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@babel/standalone@7.23.9/babel.min.js"></script>
 <style>
 /* ═══════════════════════════════════════════════════════════════════
    OPSGARDEN v4 — PIXEL RISE × GAME DASHBOARD DESIGN SYSTEM
@@ -1035,8 +1035,58 @@ body{
 </style>
 </head>
 <body>
-<div id="root"></div>
+  <div id="app-loader" style="position:fixed;inset:0;background:#ebebea;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;z-index:99999;font-family:system-ui,sans-serif;">
+    <div style="width:52px;height:52px;border-radius:12px;background:#0f0f0e;display:flex;align-items:center;justify-content:center;font-size:26px;box-shadow:0 8px 24px rgba(0,0,0,0.2);">◈</div>
+    <div style="font-size:20px;font-weight:700;color:#0f0f0e;letter-spacing:-0.5px;">OpsGarden</div>
+    <div style="display:flex;gap:6px;align-items:center;">
+      <div style="width:8px;height:8px;border-radius:50%;background:#e85d04;animation:ldot 1.2s ease-in-out infinite;"></div>
+      <div style="width:8px;height:8px;border-radius:50%;background:#e85d04;animation:ldot 1.2s ease-in-out 0.2s infinite;"></div>
+      <div style="width:8px;height:8px;border-radius:50%;background:#e85d04;animation:ldot 1.2s ease-in-out 0.4s infinite;"></div>
+    </div>
+    <div id="load-status" style="font-size:12px;color:#6b6b68;margin-top:4px;">Initializing platform...</div>
+    <style>@keyframes ldot{0%,80%,100%{transform:scale(0.6);opacity:0.4}40%{transform:scale(1);opacity:1}}</style>
+  </div>
+  <div id="app-error" style="display:none;position:fixed;inset:0;background:#fffaf8;align-items:center;justify-content:center;flex-direction:column;gap:12px;font-family:system-ui,sans-serif;padding:24px;text-align:center;">
+    <div style="font-size:36px;">⚠️</div>
+    <div style="font-size:18px;font-weight:700;color:#c44d00;">OpsGarden failed to load</div>
+    <div id="error-msg" style="font-size:13px;color:#666;max-width:400px;line-height:1.6;"></div>
+    <button onclick="location.reload()" style="margin-top:8px;padding:10px 24px;background:#e85d04;color:white;border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;">Retry</button>
+  </div>
+  <div id="root"></div>
+  <script type="text/javascript">
+    window.addEventListener('error',function(e){
+      var s=document.getElementById('load-status');
+      if(s) s.textContent='JS Error: '+e.message.slice(0,80);
+      console.error('OpsGarden error:',e.message,e.lineno);
+    });
+    window.addEventListener('unhandledrejection',function(e){console.error('Unhandled:',e.reason);});
+    window.__hideLoader=function(){
+      var l=document.getElementById('app-loader');
+      if(l){l.style.opacity='0';l.style.transition='opacity 0.5s';setTimeout(function(){l.style.display='none';},500);}
+    };
+    window.__showError=function(msg){
+      var l=document.getElementById('app-loader'),er=document.getElementById('app-error'),em=document.getElementById('error-msg');
+      if(l)l.style.display='none';
+      if(em)em.textContent=msg;
+      if(er)er.style.display='flex';
+    };
+    setTimeout(function(){
+      var l=document.getElementById('app-loader');
+      if(!l||l.style.display==='none') return;
+      var missing=[];
+      if(typeof React==='undefined') missing.push('React');
+      if(typeof ReactDOM==='undefined') missing.push('ReactDOM');
+      if(typeof Babel==='undefined') missing.push('Babel');
+      if(missing.length){
+        window.__showError('Could not load: '+missing.join(', ')+'. Check your network connection and try refreshing. If on a corporate network, CDN scripts may be blocked.');
+      } else if(document.getElementById('root').children.length===0){
+        var s=document.getElementById('load-status');
+        if(s) s.textContent='Scripts loaded, starting app... (check console if blank)';
+      }
+    },10000);
+  </script>
 <script type="text/babel">
+try{document.getElementById("load-status").textContent="React loaded, starting app...";}catch(e){}
 const {useState,useEffect,useRef,useCallback,useMemo,createContext,useContext}=React;
 // ── Error Boundary (prevents full white-screen crash) ──────────
 class ErrorBoundary extends React.Component {
@@ -5653,7 +5703,7 @@ function AuthScreen({onEnter}) {
           <div style={{fontFamily:'Nunito,sans-serif',fontWeight:900,fontSize:22,color:'white',marginBottom:8}}>🔥 Connect Firebase</div>
           <div style={{fontSize:13,color:'rgba(255,255,255,0.6)',marginBottom:16,lineHeight:1.7}}>
             1. Go to <a href="https://console.firebase.google.com" target="_blank" rel="noreferrer" style={{color:'#6ba362'}}>console.firebase.google.com</a> → Create Project<br/>
-            2. Add a Web App (click the &lt;/&gt; icon)<br/>
+            2. Add a Web App (click the </> icon)<br/>
             3. Copy the <code style={{color:'#a8d8a8'}}>firebaseConfig</code> object<br/>
             4. Paste it below<br/>
             5. Enable <strong>Authentication</strong> (Email/Password + Google), <strong>Firestore</strong>, and <strong>Storage</strong> in the Firebase console
@@ -6040,6 +6090,7 @@ function App() {
 // ═══════════════════════════════════════════════════════════════
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(React.createElement(ErrorBoundary,null,React.createElement(App,null)));
+if(window.__hideLoader) window.__hideLoader();
 </script>
 </body>
 </html>

@@ -1070,6 +1070,13 @@ body{
       if(em)em.textContent=msg;
       if(er)er.style.display='flex';
     };
+    // Show compilation progress
+    var babelDone = false;
+    var origBabelTransform = null;
+    setTimeout(function(){
+      if(document.getElementById('load-status'))
+        document.getElementById('load-status').textContent='Compiling app (large file, please wait ~30s)...';
+    },3000);
     setTimeout(function(){
       var l=document.getElementById('app-loader');
       if(!l||l.style.display==='none') return;
@@ -1078,12 +1085,12 @@ body{
       if(typeof ReactDOM==='undefined') missing.push('ReactDOM');
       if(typeof Babel==='undefined') missing.push('Babel');
       if(missing.length){
-        window.__showError('Could not load: '+missing.join(', ')+'. Check your network connection and try refreshing. If on a corporate network, CDN scripts may be blocked.');
+        window.__showError('Could not load libraries: '+missing.join(', ')+'. Please check your internet connection and try refreshing.');
       } else if(document.getElementById('root').children.length===0){
         var s=document.getElementById('load-status');
-        if(s) s.textContent='Scripts loaded, starting app... (check console if blank)';
+        if(s) s.textContent='Still compiling or a startup error occurred. Check browser console (F12) for details.';
       }
-    },10000);
+    },30000);
   </script>
 <script type="text/babel">
 try{document.getElementById("load-status").textContent="React loaded, starting app...";}catch(e){}
@@ -1159,7 +1166,7 @@ const SEED = {
     {id:'n4',type:'general',clientId:'c1',workflowId:null,text:'Aaron wants GHL as primary CRM layer. Make is the automation engine only.',date:'2025-07-04',pinned:false,tags:['architecture']}
   ],
   decisions:[
-    {id:'d1',title:'Email provider for Invoice Chaser',current:'Pending Aaron',options:['QBO native','GHL email','Make SMTP'],reason:'Each has trade-offs — QBO easiest, GHL unifies CRM, Make most flexible.',decided:false,date:'2025-07-06',who:'Aaron + You',impact:'Affects deliverability, unsubscribe handling, templates.'},
+    {id:'d1',title:'Email provider for Invoice Chaser',current:'Pending Aaron',options:['QBO native','GHL email','Make SMTP'],reason:'Each has trade-offs -- QBO easiest, GHL unifies CRM, Make most flexible.',decided:false,date:'2025-07-06',who:'Aaron + You',impact:'Affects deliverability, unsubscribe handling, templates.'},
     {id:'d2',title:'Migration approach',current:'Hybrid with improvements',options:['Exact 1:1','Hybrid'],reason:'n8n had complexity that can be simplified in Make.',decided:true,date:'2025-07-03',who:'Aaron + You',impact:'All workflows rebuilt with improvements.'},
     {id:'d3',title:'Primary automation platform',current:'Make.com',options:['n8n','Make.com','GHL native'],reason:'Aaron prefers Make for reliability and visual interface.',decided:true,date:'2025-06-30',who:'Aaron',impact:'All new builds on Make. n8n phased out.'}
   ],
@@ -1211,7 +1218,7 @@ const loadLocal = () => { try { const s=localStorage.getItem(LS_KEY); return s?J
 const saveLocal = d => { try { localStorage.setItem(LS_KEY,JSON.stringify(d)); } catch {} };
 
 // ═══════════════════════════════════════════════════════════════
-// AI ENGINE — Streaming, Groq, Ollama, OpenRouter, Anthropic
+// AI ENGINE -- Streaming, Groq, Ollama, OpenRouter, Anthropic
 // ═══════════════════════════════════════════════════════════════
 async function webSearch(q) {
   try {
@@ -1271,7 +1278,7 @@ async function callAI({system, messages, mode='work', onChunk=null, aiCfg={}}) {
   if(provider==='ollama') {
     const ep = endpoint||'http://localhost:11434/api/chat';
     const r = await fetch(ep,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:model||'llama3',stream:!!onChunk,messages:msgs})});
-    if(!r.ok) throw new Error(`Ollama ${r.status} — run: ollama serve`);
+    if(!r.ok) throw new Error(`Ollama ${r.status} -- run: ollama serve`);
     if(onChunk) return streamOllama(r,onChunk);
     return (await r.json()).message?.content||'...';
   }
@@ -1298,12 +1305,12 @@ function localFallback(input, data) {
   const q=input.toLowerCase();
   const wfs=data.workflows||[],tasks=data.tasks||[],clients=data.clients||[],notes=data.notes||[],decisions=data.decisions||[];
   if(/^(hi|hey|hello)/.test(q)) return `👋 Hey! I'm **Sprout**, your OpsGarden AI.\n\nAsk me anything:\n• "What should I do today?"\n• "What's blocked?"\n• "Summarize Aaron's work"\n• "Status overview"\n\n💡 Connect **Groq** (free) in ⚙️ Settings → AI for full conversation.`;
-  if(q.includes('workflow')){const a=wfs.filter(w=>w.status==='In Progress');return `📊 **${wfs.length} workflows** · ${a.length} active · ${wfs.filter(w=>w.status==='Complete').length} done\n\n${a.map(w=>`• **${w.name}** (${w.progress}%)\n  → ${w.nextAction}`).join('\n\n')||'None active.'}`;}
+  if(q.includes('workflow')){const a=wfs.filter(w=>w.status==='In Progress');return `📊 **${wfs.length} workflows** . ${a.length} active . ${wfs.filter(w=>w.status==='Complete').length} done\n\n${a.map(w=>`• **${w.name}** (${w.progress}%)\n  → ${w.nextAction}`).join('\n\n')||'None active.'}`;}
   if(q.includes('block')||q.includes('stuck')||q.includes('wait')){const b=tasks.filter(t=>['Blocked','Waiting'].includes(t.status));return b.length?`🔴 **Blocked/Waiting (${b.length}):**\n\n${b.map(t=>`• **${t.name}**\n  ${t.blocker||t.status}`).join('\n\n')}`:`✅ Nothing blocked!`;}
   if(q.includes('today')||q.includes('priority')||q.includes('should i')||q.includes('next')){const h=tasks.filter(t=>t.priority==='High'&&t.status!=='Complete');return h.length?`🎯 **High priority open:**\n\n${h.map(t=>`• **${t.name}** (${t.status})${t.blocker?'\n  ⛔ '+t.blocker:''}`).join('\n\n')}`:`🎉 No high-priority tasks open!`;}
-  if(q.includes('aaron')||q.includes('client')){return clients.map(c=>{const cw=wfs.filter(w=>w.clientId===c.id);return`👤 **${c.name}** — ${c.company}\nPhase: ${c.phase} · ${cw.length} workflows (${cw.filter(w=>w.status==='In Progress').length} active)\nNext: ${c.nextAction||'—'}`;}).join('\n\n')||'No clients.';}
+  if(q.includes('aaron')||q.includes('client')){return clients.map(c=>{const cw=wfs.filter(w=>w.clientId===c.id);return`👤 **${c.name}** -- ${c.company}\nPhase: ${c.phase} . ${cw.length} workflows (${cw.filter(w=>w.status==='In Progress').length} active)\nNext: ${c.nextAction||'--'}`;}).join('\n\n')||'No clients.';}
   if(q.includes('decision')){const p=decisions.filter(d=>!d.decided);return p.length?`⚖️ **Pending (${p.length}):**\n\n${p.map(d=>`• **${d.title}**\n  Options: ${d.options?.join(' / ')}`).join('\n\n')}`:`✅ All decisions resolved!`;}
-  if(q.includes('summar')||q.includes('overview')||q.includes('status')){return`🌿 **Status**\n\n• ${clients.length} clients · ${wfs.length} workflows\n• ${wfs.filter(w=>w.status==='In Progress').length} active · ${wfs.filter(w=>w.status==='Complete').length} done\n• ${tasks.filter(t=>t.status!=='Complete').length} open tasks · ${tasks.filter(t=>t.priority==='High'&&t.status!=='Complete').length} high priority\n• ${decisions.filter(d=>!d.decided).length} pending decisions`;}
+  if(q.includes('summar')||q.includes('overview')||q.includes('status')){return`🌿 **Status**\n\n• ${clients.length} clients . ${wfs.length} workflows\n• ${wfs.filter(w=>w.status==='In Progress').length} active . ${wfs.filter(w=>w.status==='Complete').length} done\n• ${tasks.filter(t=>t.status!=='Complete').length} open tasks . ${tasks.filter(t=>t.priority==='High'&&t.status!=='Complete').length} high priority\n• ${decisions.filter(d=>!d.decided).length} pending decisions`;}
   return `I'm your OpsGarden assistant! 🌿\n\nTry:\n• "What should I do today?"\n• "What's blocked?"\n• "Summarize Aaron's work"\n• "Status overview"\n\n💡 Connect free AI in ⚙️ Settings → AI tab.`;
 }
 
@@ -1337,7 +1344,7 @@ function MdText({text=''}) {
 function ThinkingDots() { return <div className="dot-wrap"><div className="dot-t"/><div className="dot-t"/><div className="dot-t"/></div>; }
 
 // ═══════════════════════════════════════════════════════════════
-// MODE TRANSITION — Transformer + Nano Particle Effect
+// MODE TRANSITION -- Transformer + Nano Particle Effect
 // ═══════════════════════════════════════════════════════════════
 function ModeTransition({from, to, onDone}) {
   const canvasRef = useRef(null);
@@ -1413,7 +1420,7 @@ function ModeTransition({from, to, onDone}) {
       ctx.clearRect(0,0,W,H);
 
       if(phase==='charge'){
-        // Anticipation: energy grid shimmer + expanding ring from center — no instant flash
+        // Anticipation: energy grid shimmer + expanding ring from center -- no instant flash
         const p = Math.min(1, elapsed/0.22);
         ctx.save();
         ctx.globalAlpha = 0.05+p*0.12;
@@ -1438,7 +1445,7 @@ function ModeTransition({from, to, onDone}) {
           const tp = (p - t.delay) / (1-t.delay+0.001);
           if(tp<1) allDone=false;
           if(tp<=0){
-            // Not yet hit by the wave — glow with anticipation based on proximity
+            // Not yet hit by the wave -- glow with anticipation based on proximity
             const proximity = Math.max(0, 1-(t.delay-p)/0.34);
             ctx.globalAlpha = 0.06+proximity*0.4;
             ctx.fillStyle = t.color;
@@ -1514,7 +1521,7 @@ function easeIn(t){return t*t*t;}
 function easeInOut(t){return t<0.5?4*t*t*t:(t-1)*(2*t-2)*(2*t-2)+1;}
 
 // ═══════════════════════════════════════════════════════════════
-// LIVING ENVIRONMENT — Garden / Game canvas
+// LIVING ENVIRONMENT -- Garden / Game canvas
 // ═══════════════════════════════════════════════════════════════
 function EnvCanvas({mode, season, tod, density='medium'}) {
   const canvasRef = useRef(null);
@@ -1731,7 +1738,7 @@ function drawBrowserParticle(ctx,e,W,H) {
 }
 
 // ═══════════════════════════════════════════════════════════════
-// AI CHARACTER — floating companion in environment
+// AI CHARACTER -- floating companion in environment
 // ═══════════════════════════════════════════════════════════════
 const AI_CHARS = {
   sprout: {emoji:'🌿',name:'Sprout',color:'#6ba362',label:'Garden Spirit'},
@@ -1776,7 +1783,7 @@ function AICharacter({charKey='sprout', onChat, mode}) {
     <div className={`ai-character ${talking?'talking':''}`}
       style={{left:`${pos.x}%`, bottom:`${pos.y}px`, transform:'translateX(-50%)'}}
       onClick={handleClick}
-      title={`${char.name} — ${char.label}`}>
+      title={`${char.name} -- ${char.label}`}>
       <div className={`ai-char-bubble${talking?' visible':''}`} style={{display:talking?'block':'none'}}>
         <span style={{fontSize:11,opacity:0.7}}>💬 {char.name}</span>
         <div style={{marginTop:3}}>{msg}</div>
@@ -1841,7 +1848,7 @@ function NotificationPanel({onClose, data}) {
 }
 
 // ═══════════════════════════════════════════════════════════════
-// AI PANEL — Streaming, multi-chat, file upload
+// AI PANEL -- Streaming, multi-chat, file upload
 // ═══════════════════════════════════════════════════════════════
 function AIPanel({open, onClose, data, update, mode}) {
   const aiCfg = data.aiSettings||{};
@@ -1937,10 +1944,10 @@ PENDING DECISIONS: ${(data.decisions||[]).filter(d=>!d.decided).map(d=>d.title).
   const quickWork=[
     {i:'🎯',l:"Today's priorities",m:"What are my top priorities today based on urgency and status?"},
     {i:'🔴',l:"What's blocked?",m:"List everything that is currently blocked or waiting on someone."},
-    {i:'👤',l:"Summarize Aaron",m:"Full status summary for Aaron LeSage — all workflows, progress, blockers, next actions."},
+    {i:'👤',l:"Summarize Aaron",m:"Full status summary for Aaron LeSage -- all workflows, progress, blockers, next actions."},
     {i:'📧',l:"Draft client update",m:"Write a short professional status update email to Aaron for this week."},
     {i:'⚖️',l:"Pending decisions",m:"What decisions are still unresolved? List them with options and why they matter."},
-    {i:'📊',l:"Full overview",m:"Give me a complete workspace overview — clients, workflows, tasks, decisions, blockers."},
+    {i:'📊',l:"Full overview",m:"Give me a complete workspace overview -- clients, workflows, tasks, decisions, blockers."},
   ];
   const quickGame=[
     {i:'🎮',l:"What should I play?",m:"Which game should I play right now to refresh my mind?"},
@@ -1958,10 +1965,10 @@ PENDING DECISIONS: ${(data.decisions||[]).filter(d=>!d.decided).map(d=>d.title).
       <div className="ai-header">
         <div className="ai-avatar-orb">{aiMode==='game'?'🎮':'🌿'}</div>
         <div style={{flex:1,minWidth:0}}>
-          <div style={{fontWeight:700,fontSize:14,color:'var(--text)'}}>Sprout {aiMode==='game'?'· Game':'· Work'}</div>
+          <div style={{fontWeight:700,fontSize:14,color:'var(--text)'}}>Sprout {aiMode==='game'?'. Game':'. Work'}</div>
           <div onClick={()=>setShowSetup(s=>!s)} style={{fontSize:10.5,color:hasAI?'var(--w-moss)':'var(--coral)',cursor:'pointer',display:'flex',alignItems:'center',gap:4}}>
             <span style={{width:6,height:6,borderRadius:'50%',background:hasAI?'#22c55e':'#ef4444',display:'inline-block'}}/>
-            {hasAI?providerLabels[provider]||provider:'Not connected — click to setup'}
+            {hasAI?providerLabels[provider]||provider:'Not connected -- click to setup'}
           </div>
         </div>
         <div style={{display:'flex',gap:4}}>
@@ -1977,9 +1984,9 @@ PENDING DECISIONS: ${(data.decisions||[]).filter(d=>!d.decided).map(d=>d.title).
           <div style={{fontWeight:700,marginBottom:10,fontSize:13}}>🔌 Connect AI</div>
           <div style={{display:'flex',flexDirection:'column',gap:8}}>
             {[
-              {k:'groq',label:'⚡ Groq',badge:'FREE',desc:'Llama 3.1 70B · smartest free · get key at console.groq.com',needsKey:true,link:'https://console.groq.com'},
-              {k:'ollama',label:'🦙 Ollama',badge:'FREE LOCAL',desc:'Private & offline · install from ollama.com · run: ollama serve',needsKey:false,link:'https://ollama.com'},
-              {k:'openrouter',label:'🌩️ OpenRouter',badge:'FREE TIER',desc:'Free Llama/Mistral via API · key at openrouter.ai',needsKey:true,link:'https://openrouter.ai'},
+              {k:'groq',label:'⚡ Groq',badge:'FREE',desc:'Llama 3.1 70B . smartest free . get key at console.groq.com',needsKey:true,link:'https://console.groq.com'},
+              {k:'ollama',label:'🦙 Ollama',badge:'FREE LOCAL',desc:'Private & offline . install from ollama.com . run: ollama serve',needsKey:false,link:'https://ollama.com'},
+              {k:'openrouter',label:'🌩️ OpenRouter',badge:'FREE TIER',desc:'Free Llama/Mistral via API . key at openrouter.ai',needsKey:true,link:'https://openrouter.ai'},
             ].map(ai=>(
               <div key={ai.k} style={{background:'var(--surface)',borderRadius:10,padding:'9px 12px',border:`1.5px solid ${(aiCfg.provider||'groq')===ai.k?'var(--accent)':'var(--border)'}`}}>
                 <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:4}}>
@@ -2079,20 +2086,20 @@ PENDING DECISIONS: ${(data.decisions||[]).filter(d=>!d.decided).map(d=>d.title).
         </button>
       </div>
       <div style={{padding:'4px 14px 8px',textAlign:'center',fontSize:10,color:'var(--text3)'}}>
-        Enter to send · <span style={{color:hasAI?'#22c55e':'#ef4444'}}>{hasAI?`🟢 ${providerLabels[provider]||provider} connected`:'🔴 No AI — type for smart fallback'}</span>
+        Enter to send . <span style={{color:hasAI?'#22c55e':'#ef4444'}}>{hasAI?`🟢 ${providerLabels[provider]||provider} connected`:'🔴 No AI -- type for smart fallback'}</span>
       </div>
     </div>
   );
 }
 
 // ═══════════════════════════════════════════════════════════════
-// GARDEN DASHBOARD — Isometric park with KPI buildings + NPCs
+// GARDEN DASHBOARD -- Isometric park with KPI buildings + NPCs
 // ═══════════════════════════════════════════════════════════════
-// Helper — can't use CSS var() in JS directly
+// Helper -- can't use CSS var() in JS directly
 const var_r = 'var(--r)';
 
 // ═══════════════════════════════════════════════════════════════
-// GARDEN 3D — Three.js isometric/tilt-view park dashboard
+// GARDEN 3D -- Three.js isometric/tilt-view park dashboard
 // ═══════════════════════════════════════════════════════════════
 function Garden3D({buildings, season, tod, onEnter}) {
   const mountRef = useRef(null);
@@ -2127,7 +2134,7 @@ function Garden3D({buildings, season, tod, onEnter}) {
     scene.background = new THREE.Color(skyColor);
     scene.fog = new THREE.Fog(fogColor, 26, 70);
 
-    // ── Camera: tilted "god view" — above and slightly in front ──
+    // ── Camera: tilted "god view" -- above and slightly in front ──
     const camera = new THREE.PerspectiveCamera(38, width/height, 0.1, 300);
     const defaultPos = new THREE.Vector3(15, 15.5, 21);
     camera.position.copy(defaultPos);
@@ -2517,7 +2524,7 @@ function GardenDashboard({data, openWorkflow, setPage, mode, season, tod}) {
     <div style={{display:'flex',flexDirection:'column',gap:18,position:'relative',paddingBottom:8}}>
 
       {/* ══════════════════════════════════════════
-          HERO ROW — 3D KPI scene + 3D park
+          HERO ROW -- 3D KPI scene + 3D park
           ══════════════════════════════════════════ */}
       <div className="kpi-scene" style={{display:'grid',gridTemplateColumns:'1fr 360px',gap:14}}>
 
@@ -2553,7 +2560,7 @@ function GardenDashboard({data, openWorkflow, setPage, mode, season, tod}) {
             <div>
               <div style={{fontSize:10,fontWeight:700,color:'var(--text3)',textTransform:'uppercase',letterSpacing:'1.5px',marginBottom:8,display:'flex',alignItems:'center',gap:6}}>
                 <span style={{width:6,height:6,borderRadius:'50%',background:'#22c55e',display:'inline-block',boxShadow:'0 0 6px #22c55e'}}/>
-                Operations HQ · {today}
+                Operations HQ . {today}
               </div>
               <div style={{fontFamily:'var(--font-h)',fontWeight:800,fontSize:38,lineHeight:1.05,color:'var(--text)',letterSpacing:'-1.5px',marginBottom:10}}>
                 {stats.active > 0
@@ -2562,7 +2569,7 @@ function GardenDashboard({data, openWorkflow, setPage, mode, season, tod}) {
                 }
               </div>
               <div style={{fontSize:12.5,color:'var(--text3)',lineHeight:1.7,maxWidth:280}}>
-                {tasks.filter(t=>t.status!=='Complete').length} open tasks · {clients.length} clients · {stats.done} completed
+                {tasks.filter(t=>t.status!=='Complete').length} open tasks . {clients.length} clients . {stats.done} completed
               </div>
             </div>
 
@@ -2627,12 +2634,12 @@ function GardenDashboard({data, openWorkflow, setPage, mode, season, tod}) {
       </div>
 
       {/* ══════════════════════════════════════════
-          KPI CARDS ROW — 3D tilt perspective
+          KPI CARDS ROW -- 3D tilt perspective
           ══════════════════════════════════════════ */}
       <div className="kpi-scene">
         <div className="kpi-tilt-row">
 
-          {/* Card 1: Automations — WIDE hero */}
+          {/* Card 1: Automations -- WIDE hero */}
           <div className="kpi-card-3d card" style={{
             '--kpi-c':'#e85d04','--kpi-c2':'#ff7b2e',
             background:'var(--w-dark,#0f0f0e)',
@@ -2709,7 +2716,7 @@ function GardenDashboard({data, openWorkflow, setPage, mode, season, tod}) {
       </div>
 
       {/* ══════════════════════════════════════════
-          BOTTOM GRID — Workflows + Tasks + Decisions
+          BOTTOM GRID -- Workflows + Tasks + Decisions
           ══════════════════════════════════════════ */}
       <div style={{display:'grid',gridTemplateColumns:'1.4fr 1fr',gap:14}}>
 
@@ -2967,7 +2974,7 @@ function ClientsPage({data, update}) {
               <div style={{fontSize:12,color:'var(--text2)',marginBottom:8}}>📍 {c.phase||'No phase set'}</div>
               <div style={{display:'flex',gap:10,fontSize:12,color:'var(--text3)',alignItems:'center'}}>
                 <span>⚡ {cWfs.length} workflows</span>
-                <span>· {cWfs.filter(w=>w.status==='In Progress').length} active</span>
+                <span>. {cWfs.filter(w=>w.status==='In Progress').length} active</span>
                 <span style={{marginLeft:'auto',fontWeight:700,color:riskColor[c.riskLevel]||'var(--text3)',fontSize:11}}>Risk: {c.riskLevel}</span>
               </div>
               {c.tags?.length>0&&<div style={{marginTop:10}}>{c.tags.map(t=><Tag key={t} c={t}/>)}</div>}
@@ -2994,7 +3001,7 @@ function ClientsPage({data, update}) {
             </div>
             <div className="modal-body">
               <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:16,marginBottom:16}}>
-                {[{l:'Email',v:sel.email||'—'},{l:'Phone',v:sel.phone||'—'},{l:'Timezone',v:sel.timezone||'—'},{l:'Phase',v:sel.phase||'—'},{l:'Risk',v:sel.riskLevel},{l:'Last Updated',v:sel.lastUpdated||'—'}].map(({l,v})=>(
+                {[{l:'Email',v:sel.email||'--'},{l:'Phone',v:sel.phone||'--'},{l:'Timezone',v:sel.timezone||'--'},{l:'Phase',v:sel.phase||'--'},{l:'Risk',v:sel.riskLevel},{l:'Last Updated',v:sel.lastUpdated||'--'}].map(({l,v})=>(
                   <div key={l} style={{padding:'10px 14px',background:'var(--surface2)',borderRadius:var_r}}>
                     <div style={{fontSize:10.5,color:'var(--text3)',fontWeight:700,marginBottom:4}}>{l}</div>
                     <div style={{fontSize:13,fontWeight:600}}>{v}</div>
@@ -3061,7 +3068,7 @@ function WorkflowsPage({data, update, openWorkflow}) {
     <div>
       <div style={{background:'linear-gradient(135deg,color-mix(in srgb,var(--accent) 8%,white),color-mix(in srgb,var(--accent2) 6%,white))',borderRadius:'var(--r-lg)',padding:'16px 20px',marginBottom:18,border:'1.5px solid var(--border)'}}>
         <div style={{fontFamily:'var(--font-h)',fontWeight:900,fontSize:18,marginBottom:3}}>⚡ Automations</div>
-        <div style={{fontSize:12.5,color:'var(--text2)'}}>Build, manage, and run automations — internal actions and external platform integrations (GHL, Make, n8n, Zapier, and more).</div>
+        <div style={{fontSize:12.5,color:'var(--text2)'}}>Build, manage, and run automations -- internal actions and external platform integrations (GHL, Make, n8n, Zapier, and more).</div>
       </div>
       <div style={{display:'flex',gap:8,marginBottom:16,alignItems:'center',flexWrap:'wrap'}}>
         <div style={{display:'flex',gap:6,flex:1,flexWrap:'wrap'}}>
@@ -3078,7 +3085,7 @@ function WorkflowsPage({data, update, openWorkflow}) {
               return (
                 <tr key={wf.id} style={{cursor:'pointer'}} onClick={()=>openWorkflow(wf)}>
                   <td><div style={{fontWeight:700,fontSize:13}}>{wf.name}</div><div style={{fontSize:11,color:'var(--text3)',marginTop:2}}>{wf.summary?.slice(0,55)}...</div></td>
-                  <td style={{fontSize:12,color:'var(--text2)'}}>{client?.name||'—'}</td>
+                  <td style={{fontSize:12,color:'var(--text2)'}}>{client?.name||'--'}</td>
                   <td><StatusBadge status={wf.status}/></td>
                   <td style={{minWidth:100}}>
                     <div style={{display:'flex',alignItems:'center',gap:8}}>
@@ -3155,13 +3162,13 @@ function AutomationBuilder({data, update, onBack, workflow}) {
     const log=m=>setTestLog(p=>[...p,{ts:new Date().toLocaleTimeString(),msg:m}]);
     log('🚀 Starting automation test...');
     await new Promise(r=>setTimeout(r,600));
-    if(trigger) log(`✅ Trigger "${trigger.label}" — simulated payload received`);
+    if(trigger) log(`✅ Trigger "${trigger.label}" -- simulated payload received`);
     else { log('❌ No trigger set. Add a trigger first.'); setTesting(false); return; }
     for(const a of actions){
       await new Promise(r=>setTimeout(r,400));
       log(`⚙️ Running action: ${a.label}...`);
       await new Promise(r=>setTimeout(r,500));
-      log(`✅ ${a.label} — completed successfully (simulated)`);
+      log(`✅ ${a.label} -- completed successfully (simulated)`);
     }
     log('🎉 Automation test complete!');
     setTesting(false);
@@ -3322,7 +3329,7 @@ function AutomationBuilder({data, update, onBack, workflow}) {
           <div className="form-row">
             <div className="form-group"><label className="form-label">Client</label>
               <select className="form-select">
-                <option value="">— None —</option>
+                <option value="">-- None --</option>
                 {(data.clients||[]).map(c=><option key={c.id} value={c.id}>{c.name}</option>)}
               </select>
             </div>
@@ -3360,10 +3367,10 @@ function AutomationBuilder({data, update, onBack, workflow}) {
               {[...new Set(actions.map(a=>a.platform))].filter(p=>p!=='Internal').map(p=>(
                 <div key={p} style={{padding:'7px 10px',background:'var(--surface)',borderRadius:8,marginBottom:6,fontSize:12,display:'flex',alignItems:'center',gap:8}}>
                   <span style={{width:7,height:7,borderRadius:'50%',background:'var(--w-gold)',display:'inline-block'}}/>
-                  {p} — configure in Settings → Integrations
+                  {p} -- configure in Settings → Integrations
                 </div>
               ))}
-              {actions.every(a=>a.platform==='Internal')&&<div style={{fontSize:12,color:'var(--text3)'}}>✅ All internal actions — no external platforms needed.</div>}
+              {actions.every(a=>a.platform==='Internal')&&<div style={{fontSize:12,color:'var(--text3)'}}>✅ All internal actions -- no external platforms needed.</div>}
             </div>
           </div>
           <div style={{background:'#1e2835',borderRadius:var_r,padding:'14px',marginBottom:14,minHeight:140,fontFamily:'monospace',fontSize:12,color:'#a0c8a0',maxHeight:220,overflowY:'auto'}}>
@@ -3381,7 +3388,7 @@ function AutomationBuilder({data, update, onBack, workflow}) {
   );
 }
 
-// ── Tasks Page — Full Project Management ─────────────────────
+// ── Tasks Page -- Full Project Management ─────────────────────
 function TasksPage({data, update}) {
   const [view, setView] = useState('list'); // list | kanban
   const [filter, setFilter] = useState('Open');
@@ -3458,12 +3465,12 @@ function TasksPage({data, update}) {
                       {wf&&<div style={{fontSize:11,color:'var(--text3)',marginTop:2}}>⚡ {wf.name}</div>}
                       {t.nextAction&&<div style={{fontSize:11,color:'var(--accent-d)',marginTop:2}}>→ {t.nextAction}</div>}
                     </td>
-                    <td style={{fontSize:12,color:'var(--text2)'}}>{client?.name||'—'}</td>
+                    <td style={{fontSize:12,color:'var(--text2)'}}>{client?.name||'--'}</td>
                     <td><PriLabel p={t.priority}/></td>
                     <td><StatusBadge status={t.status}/></td>
-                    <td style={{fontSize:12}}>{t.owner||'—'}</td>
-                    <td style={{fontSize:12,color:overdue?'#e07a7a':'var(--text2)',fontWeight:overdue?700:400}}>{t.dueDate||'—'}{overdue&&' ⚠️'}</td>
-                    <td style={{fontSize:12,color:'var(--text3)',maxWidth:160,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{t.blocker||'—'}</td>
+                    <td style={{fontSize:12}}>{t.owner||'--'}</td>
+                    <td style={{fontSize:12,color:overdue?'#e07a7a':'var(--text2)',fontWeight:overdue?700:400}}>{t.dueDate||'--'}{overdue&&' ⚠️'}</td>
+                    <td style={{fontSize:12,color:'var(--text3)',maxWidth:160,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{t.blocker||'--'}</td>
                     <td>
                       <div style={{display:'flex',gap:4}}>
                         <button className="btn btn-ghost btn-xs" onClick={()=>setSelTask(t)}>👁</button>
@@ -3530,7 +3537,7 @@ function TasksPage({data, update}) {
             </div>
             <div className="modal-body">
               <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:12,marginBottom:14}}>
-                {[{l:'Owner',v:selTask.owner||'—'},{l:'Status',v:selTask.status},{l:'Next Action',v:selTask.nextAction||'—'},{l:'Blocker',v:selTask.blocker||'—'}].map(({l,v})=>(
+                {[{l:'Owner',v:selTask.owner||'--'},{l:'Status',v:selTask.status},{l:'Next Action',v:selTask.nextAction||'--'},{l:'Blocker',v:selTask.blocker||'--'}].map(({l,v})=>(
                   <div key={l} style={{padding:'9px 12px',background:'var(--surface2)',borderRadius:10}}>
                     <div style={{fontSize:10.5,color:'var(--text3)',fontWeight:700,marginBottom:3}}>{l}</div>
                     <div style={{fontSize:13,fontWeight:600}}>{v}</div>
@@ -3559,13 +3566,13 @@ function TasksPage({data, update}) {
               <div className="form-row">
                 <div className="form-group"><label className="form-label">Client</label>
                   <select className="form-select" value={form.clientId} onChange={f('clientId')}>
-                    <option value="">— None —</option>
+                    <option value="">-- None --</option>
                     {(data.clients||[]).map(c=><option key={c.id} value={c.id}>{c.name}</option>)}
                   </select>
                 </div>
                 <div className="form-group"><label className="form-label">Workflow</label>
                   <select className="form-select" value={form.workflowId} onChange={f('workflowId')}>
-                    <option value="">— None —</option>
+                    <option value="">-- None --</option>
                     {(data.workflows||[]).map(w=><option key={w.id} value={w.id}>{w.name}</option>)}
                   </select>
                 </div>
@@ -3625,7 +3632,7 @@ function NotesPage({data, update}) {
     <div>
       <div className="quick-capture">
         <span style={{fontSize:20}}>✏️</span>
-        <input placeholder="Quick capture — what do you need to remember?" value={quick} onChange={e=>setQuick(e.target.value)} onKeyDown={e=>e.key==='Enter'&&addNote()}/>
+        <input placeholder="Quick capture -- what do you need to remember?" value={quick} onChange={e=>setQuick(e.target.value)} onKeyDown={e=>e.key==='Enter'&&addNote()}/>
         <select style={{border:'1px solid var(--border2)',borderRadius:8,padding:'5px 9px',fontSize:12,background:'var(--surface)',color:'var(--text2)',fontFamily:'var(--font)'}} value={qType} onChange={e=>setQType(e.target.value)}>
           {['general','decision','reminder','waiting','question','change'].map(t=><option key={t}>{t}</option>)}
         </select>
@@ -3691,7 +3698,7 @@ function DocsPage({data, update}) {
                     {d.url&&<a href={d.url} target="_blank" rel="noreferrer" onClick={e=>e.stopPropagation()} style={{fontSize:11,color:'var(--accent)',textDecoration:'none'}}>🔗 Open link ↗</a>}
                   </td>
                   <td><span className="tag">{d.type}</span></td>
-                  <td style={{fontSize:12,color:'var(--text3)'}}>{client?.name||'—'}</td>
+                  <td style={{fontSize:12,color:'var(--text3)'}}>{client?.name||'--'}</td>
                   <td style={{fontSize:12,color:'var(--text3)',maxWidth:200}}>{d.notes}</td>
                   <td><button className="btn btn-danger btn-xs" onClick={()=>update('docs',docs.filter(x=>x.id!==d.id))}>✕</button></td>
                 </tr>
@@ -3714,7 +3721,7 @@ function DocsPage({data, update}) {
                 </div>
                 <div className="form-group"><label className="form-label">Client</label>
                   <select className="form-select" value={form.clientId} onChange={f('clientId')}>
-                    <option value="">— None —</option>
+                    <option value="">-- None --</option>
                     {(data.clients||[]).map(c=><option key={c.id} value={c.id}>{c.name}</option>)}
                   </select>
                 </div>
@@ -3825,7 +3832,7 @@ function WorkflowDetailPage({workflow:wfInit, data, update, onBack}) {
         <div style={{display:'flex',alignItems:'flex-start',gap:16}}>
           <div style={{flex:1}}>
             <div style={{fontFamily:'var(--font-h)',fontWeight:900,fontSize:22,marginBottom:4}}>{wf.name}</div>
-            <div style={{fontSize:13,color:'var(--text3)',marginBottom:10}}>{client?.name||'Unknown Client'} · {client?.company||''}</div>
+            <div style={{fontSize:13,color:'var(--text3)',marginBottom:10}}>{client?.name||'Unknown Client'} . {client?.company||''}</div>
             <div style={{display:'flex',gap:9,flexWrap:'wrap',alignItems:'center'}}>
               <StatusBadge status={wf.status}/><PriLabel p={wf.priority}/>
               <span style={{fontSize:12,color:'var(--text3)'}}>{wf.platformFrom} → {wf.platformTo}</span>
@@ -3858,7 +3865,7 @@ function WorkflowDetailPage({workflow:wfInit, data, update, onBack}) {
             {[{t:'🎯 Next Action',v:wf.nextAction,c:'var(--text)'},{t:'⏳ Waiting On',v:wf.waitingOn||'Nothing',c:'#e4b86a'},{t:'🔑 Credentials Needed',v:wf.credentialsNeeded,c:'var(--text2)'}].map(({t,v,c})=>(
               <div key={t} className="card card-sm">
                 <div className="detail-section-title">{t}</div>
-                <p style={{fontSize:13,color:c,fontWeight:600}}>{v||'—'}</p>
+                <p style={{fontSize:13,color:c,fontWeight:600}}>{v||'--'}</p>
               </div>
             ))}
           </div>
@@ -3896,7 +3903,7 @@ function WorkflowDetailPage({workflow:wfInit, data, update, onBack}) {
               <div style={{display:'flex',gap:7,marginBottom:8,flexWrap:'wrap'}}>
                 {(d.options||[]).map(o=><span key={o} style={{padding:'3px 10px',borderRadius:20,fontSize:11.5,fontWeight:700,background:d.current===o?'color-mix(in srgb,var(--accent) 12%,white)':'var(--surface2)',color:d.current===o?'var(--accent-d)':'var(--text3)',border:'1.5px solid',borderColor:d.current===o?'var(--accent)':'var(--border)'}}>{o}{d.current===o&&' ✓'}</span>)}
               </div>
-              <div style={{fontSize:12,color:'var(--text3)'}}>Current: <strong>{d.current}</strong> · {d.date}</div>
+              <div style={{fontSize:12,color:'var(--text3)'}}>Current: <strong>{d.current}</strong> . {d.date}</div>
             </div>
           ))}
         </div>
@@ -3907,7 +3914,7 @@ function WorkflowDetailPage({workflow:wfInit, data, update, onBack}) {
           {wfNotes.length===0&&<div className="empty-state"><div className="empty-icon">📝</div><div className="empty-title">No notes for this workflow</div></div>}
           {wfNotes.map(n=>(
             <div key={n.id} style={{background:'var(--surface)',borderLeft:'4px solid var(--accent)',borderRadius:'0 var(--r) var(--r) 0',padding:'12px 16px',marginBottom:10,border:'1.5px solid var(--border)'}}>
-              <div style={{fontSize:10.5,color:'var(--text3)',marginBottom:4}}>{n.date} · {n.type}</div>
+              <div style={{fontSize:10.5,color:'var(--text3)',marginBottom:4}}>{n.date} . {n.type}</div>
               <div style={{fontSize:13,color:'var(--text2)',lineHeight:1.6}}>{n.text}</div>
             </div>
           ))}
@@ -3943,11 +3950,11 @@ function GamesPage() {
   if(game==='snake')    return <SnakeGame    onBack={()=>setGame(null)}/>;
 
   const gameList=[
-    {id:'space',  icon:'🚀',title:'Space Defender', desc:'Wave-based arcade shooter — blast invaders, dodge fire, survive the swarm!', color:'#00d4ff'},
+    {id:'space',  icon:'🚀',title:'Space Defender', desc:'Wave-based arcade shooter -- blast invaders, dodge fire, survive the swarm!', color:'#00d4ff'},
     {id:'snake',  icon:'🐍',title:'Snake Run',      desc:'Classic snake with a neon glow. Eat, grow, don't bite yourself!',            color:'#39ff14'},
     {id:'ludo',    icon:'🎲',title:'Ludo Quest',     desc:'Classic Ludo with D&D dungeon style. Roll dice, move pieces, race to win!',  color:'#b44dff'},
     {id:'memory',  icon:'🃏',title:'Memory Duel',    desc:'Race the AI to match all card pairs. It remembers what it has seen!',         color:'#00d4ff'},
-    {id:'tictac',  icon:'⭕',title:'Tic-Tac-Toe',    desc:'Play against the AI. It uses perfect minimax strategy — can you win?',       color:'#39ff14'},
+    {id:'tictac',  icon:'⭕',title:'Tic-Tac-Toe',    desc:'Play against the AI. It uses perfect minimax strategy -- can you win?',       color:'#39ff14'},
     {id:'reaction',icon:'⚡',title:'Reaction Race',  desc:'Click faster than the AI when the signal fires. Pure reflexes!',            color:'#ffdd00'},
     {id:'breathing',icon:'🫁',title:'Calm Breathing','desc':'Box breathing 4-4-6 with Sprout encouraging you every few cycles.',         color:'#7ab8d8'},
     {id:'focus',   icon:'⏱️',title:'Focus Timer',    desc:'Pomodoro-style focus timer. AI checks in when your session ends.',          color:'#6ba362'},
@@ -3972,7 +3979,7 @@ function GamesPage() {
   );
 }
 
-// ── Ludo Game — Real playable board (48-cell ring + bases + home) ──
+// ── Ludo Game -- Real playable board (48-cell ring + bases + home) ──
 const LUDO_PLAYERS = [
   {name:'You',     color:'#e05050', label:'🔴'},
   {name:'AI Blue', color:'#4080e0', label:'🔵'},
@@ -4076,7 +4083,7 @@ function LudoGame({onBack}) {
         const vm=ludoValidMoves(0,r,piecesRef.current);
         if(vm.length===0){
           setNoMove(true);
-          setTimeout(()=>{ setNoMove(false); setDice(null); setTurn(1); addLog('😶 No valid moves — pass.'); },1100);
+          setTimeout(()=>{ setNoMove(false); setDice(null); setTurn(1); addLog('😶 No valid moves -- pass.'); },1100);
         }
       }
     },80);
@@ -4093,11 +4100,11 @@ function LudoGame({onBack}) {
     setPieces(next);
     const w=ludoCheckWinner(next);
     if(w!==null){ setOver(w); addLog(w===0?'🏆🎉 YOU WIN!':'🏆 '+LUDO_PLAYERS[w].name+' wins!'); setDice(null); return; }
-    if(dice===6){ addLog('🎲 Rolled 6 — roll again!'); setDice(null); }
+    if(dice===6){ addLog('🎲 Rolled 6 -- roll again!'); setDice(null); }
     else { setDice(null); setTurn(1); }
   };
 
-  /* ── AI turn — self-contained, reads ref not closure ── */
+  /* ── AI turn -- self-contained, reads ref not closure ── */
   const aiRunning = useRef(false);
   useEffect(()=>{
     if(turn===0 || over!==null || aiRunning.current) return;
@@ -4117,7 +4124,7 @@ function LudoGame({onBack}) {
           const vm=ludoValidMoves(player,r,cur);
 
           if(vm.length===0){
-            addLog(`${LUDO_PLAYERS[player].label} No valid moves — pass.`);
+            addLog(`${LUDO_PLAYERS[player].label} No valid moves -- pass.`);
             setTimeout(()=>{
               setDice(null);
               aiRunning.current=false;
@@ -4150,7 +4157,7 @@ function LudoGame({onBack}) {
             setDice(null);
             aiRunning.current=false;
             if(w!==null){ setOver(w); addLog('🏆 '+LUDO_PLAYERS[w].name+' wins!'); return; }
-            if(r===6){ addLog(`${LUDO_PLAYERS[player].label} Rolled 6 — goes again!`); setTurn(player); }
+            if(r===6){ addLog(`${LUDO_PLAYERS[player].label} Rolled 6 -- goes again!`); setTurn(player); }
             else { setTurn((player+1)%4); }
           },600);
         }
@@ -4251,7 +4258,7 @@ function LudoGame({onBack}) {
               {dice?['⚀','⚁','⚂','⚃','⚄','⚅'][dice-1]:'🎲'}
             </div>
             <div style={{fontSize:11,color:'rgba(255,255,255,0.45)',marginTop:5}}>
-              {over!==null?'':turn===0?(dice?(myValidLocals.length?'Tap glowing piece':'Pass...'):(rolling?'Rolling…':'Click die to roll')):LUDO_PLAYERS[turn].name+' thinking…'}
+              {over!==null?'':turn===0?(dice?(myValidLocals.length?'Tap glowing piece':'Pass...'):(rolling?'Rolling...':'Click die to roll')):LUDO_PLAYERS[turn].name+' thinking...'}
             </div>
           </div>
           {over!==null&&<div style={{textAlign:'center',marginTop:10}}>
@@ -4462,7 +4469,7 @@ function ReactionRace({onBack}) {
         </div>
         <div onClick={handleClick} style={{background:bg,borderRadius:'var(--r-lg)',padding:'60px 40px',cursor:['waiting','go'].includes(phase)?'pointer':'default',border:`3px solid ${phase==='go'?'var(--accent)':phase==='waiting'?'var(--w-gold)':'var(--border)'}`,transition:'all 0.15s',userSelect:'none',minHeight:180,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:10}}>
           <div style={{fontFamily:'var(--font-h)',fontWeight:900,fontSize:22}}>{phase==='ready'?'⚡ Reaction Race':phase==='waiting'?'⏳ Wait for green...':phase==='go'?'🟢 CLICK NOW!':msg}</div>
-          {phase==='result'&&playerMs>0&&<div style={{fontSize:13,color:'var(--text3)'}}>You: {playerMs}ms · Sprout: {aiMs}ms</div>}
+          {phase==='result'&&playerMs>0&&<div style={{fontSize:13,color:'var(--text3)'}}>You: {playerMs}ms . Sprout: {aiMs}ms</div>}
           {phase==='go'&&<div style={{fontSize:42}}>👆</div>}
         </div>
         {(phase==='ready'||phase==='result')&&<button className="btn btn-primary" style={{marginTop:14,width:'100%'}} onClick={startRound}>{phase==='ready'?'Start':'Next Round'}</button>}
@@ -4493,7 +4500,7 @@ function BreathingTimer({onBack}) {
       <button className="btn btn-ghost btn-sm" onClick={onBack} style={{marginBottom:16}}>← Back</button>
       <div className="card" style={{maxWidth:380,margin:'0 auto',textAlign:'center',padding:'40px 30px'}}>
         <div style={{fontFamily:'var(--font-h)',fontWeight:900,fontSize:20,marginBottom:4}}>🫁 Calm Breathing</div>
-        <div style={{fontSize:13,color:'var(--text3)',marginBottom:24}}>4 in · 4 hold · 6 out · Cycles: {cycles}</div>
+        <div style={{fontSize:13,color:'var(--text3)',marginBottom:24}}>4 in . 4 hold . 6 out . Cycles: {cycles}</div>
         <div style={{display:'flex',alignItems:'center',justifyContent:'center',height:200}}>
           <div style={{width:sz,height:sz,borderRadius:'50%',background:cols[phase],display:'flex',alignItems:'center',justifyContent:'center',transition:'all 1.2s ease',flexDirection:'column',boxShadow:`0 0 40px ${cols[phase]}66`}}>
             <div style={{fontSize:26,fontWeight:900,fontFamily:'var(--font-h)',color:'white'}}>{phase!=='ready'?count:''}</div>
@@ -4543,7 +4550,7 @@ function FocusTimer({onBack}) {
   );
 }
 
-// ── Space Defender — original arcade shooter ──────────────────
+// ── Space Defender -- original arcade shooter ──────────────────
 function SpaceDefenderGame({onBack}) {
   const canvasRef = useRef(null);
   const stateRef  = useRef(null);
@@ -4715,7 +4722,7 @@ function SpaceDefenderGame({onBack}) {
   );
 }
 
-// ── Snake Run — classic snake, original implementation ─────────
+// ── Snake Run -- classic snake, original implementation ─────────
 function SnakeGame({onBack}) {
   const canvasRef=useRef(null);
   const GRID=18, CELLS=20;
@@ -4839,42 +4846,42 @@ function SnakeGame({onBack}) {
 
 const AI_PROVIDERS = [
   {id:'groq',      name:'Groq',       badge:'free',  icon:'⚡', model:'llama-3.1-8b-instant', needsKey:true,
-   desc:'Llama 3.1 70B · Very fast · Smartest free option · No credit card',
+   desc:'Llama 3.1 70B . Very fast . Smartest free option . No credit card',
    setup:'1. Go to console.groq.com\n2. Sign up free (no card needed)\n3. Click "API Keys" → Create Key\n4. Paste the key below',
    yt:'https://youtube.com/results?search_query=groq+api+key+setup',
    link:'https://console.groq.com'},
   {id:'ollama',    name:'Ollama',     badge:'free',  icon:'🦙', model:'llama3', needsKey:false, endpoint:'http://localhost:11434/api/chat',
-   desc:'100% Local · Private · No internet needed · Unlimited · No key',
+   desc:'100% Local . Private . No internet needed . Unlimited . No key',
    setup:'1. Download from ollama.com\n2. Install and open\n3. Open Terminal:\n   ollama pull llama3\n   ollama serve\n4. Select Ollama here and Save',
    yt:'https://youtube.com/results?search_query=ollama+local+ai+setup',
    link:'https://ollama.com'},
   {id:'openrouter',name:'OpenRouter', badge:'free',  icon:'🌩️', model:'meta-llama/llama-3.1-8b-instruct:free', needsKey:true,
-   desc:'Free tier · Llama/Mistral/Gemma via API · Rate limited',
+   desc:'Free tier . Llama/Mistral/Gemma via API . Rate limited',
    setup:'1. Go to openrouter.ai\n2. Sign up free\n3. Dashboard → Keys → Create Key\n4. Paste below',
    yt:'https://youtube.com/results?search_query=openrouter+api+key+free',
    link:'https://openrouter.ai'},
   {id:'lmstudio',  name:'LM Studio',  badge:'free',  icon:'🖥️', model:'local-model', needsKey:false, endpoint:'http://localhost:1234/v1/chat/completions',
-   desc:'Desktop GUI · Run open-source models locally · Easy interface',
+   desc:'Desktop GUI . Run open-source models locally . Easy interface',
    setup:'1. Download from lmstudio.ai\n2. Install and open\n3. Browse models → Download one\n4. Start Local Server (top menu)\n5. Select LM Studio here',
    yt:'https://youtube.com/results?search_query=lm+studio+local+ai+setup',
    link:'https://lmstudio.ai'},
   {id:'anthropic', name:'Anthropic',  badge:'paid',  icon:'🧠', model:'claude-haiku-4-5-20251001', needsKey:true,
-   desc:'Claude Haiku (affordable) or Sonnet · Very capable · Paid',
+   desc:'Claude Haiku (affordable) or Sonnet . Very capable . Paid',
    setup:'1. Go to console.anthropic.com\n2. Sign up → Add billing\n3. API Keys → Create Key\n4. Paste below',
    yt:'https://youtube.com/results?search_query=anthropic+claude+api+key+setup',
    link:'https://console.anthropic.com'},
   {id:'openai',    name:'OpenAI',     badge:'paid',  icon:'💬', model:'gpt-4o-mini', needsKey:true,
-   desc:'GPT-4o-mini (affordable) or GPT-4o · Reliable · Paid',
+   desc:'GPT-4o-mini (affordable) or GPT-4o . Reliable . Paid',
    setup:'1. Go to platform.openai.com\n2. Sign up → Add billing\n3. API Keys → Create Key\n4. Paste below',
    yt:'https://youtube.com/results?search_query=openai+api+key+setup',
    link:'https://platform.openai.com'},
   {id:'jan',       name:'Jan.ai',     badge:'free',  icon:'🌐', model:'mistral-7b-instruct', needsKey:false, endpoint:'http://localhost:1337/v1/chat/completions',
-   desc:'Open-source · Local desktop app · Privacy first',
+   desc:'Open-source . Local desktop app . Privacy first',
    setup:'1. Download from jan.ai\n2. Install → Open\n3. Download a model inside Jan\n4. Start API Server in Jan settings\n5. Select Jan here',
    yt:'https://youtube.com/results?search_query=jan.ai+local+llm+setup',
    link:'https://jan.ai'},
   {id:'custom',    name:'Custom API', badge:'both',  icon:'⚙️', model:'your-model', needsKey:false,
-   desc:'Any OpenAI-compatible endpoint · LiteLLM, vLLM, llama.cpp server etc.',
+   desc:'Any OpenAI-compatible endpoint . LiteLLM, vLLM, llama.cpp server etc.',
    setup:'1. Set up your OpenAI-compatible server\n2. Enter endpoint URL below\n3. Enter model name\n4. Add API key if required',
    yt:'https://youtube.com/results?search_query=openai+compatible+api+self+hosted',
    link:''},
@@ -4964,7 +4971,7 @@ function SettingsPage({data, update, viewMode, setViewMode}) {
         {tab==='ai' && (
           <div>
             <div style={{fontFamily:'var(--font-h)',fontWeight:900,fontSize:22,marginBottom:4}}>🤖 AI Engine</div>
-            <div style={{fontSize:13,color:'var(--text3)',marginBottom:22}}>Choose your AI provider. Free options first — no credit card needed for Groq or Ollama.</div>
+            <div style={{fontSize:13,color:'var(--text3)',marginBottom:22}}>Choose your AI provider. Free options first -- no credit card needed for Groq or Ollama.</div>
 
             <div style={{display:'grid', gridTemplateColumns:'220px 1fr', gap:18}}>
               {/* Left: AI list */}
@@ -5050,7 +5057,7 @@ function SettingsPage({data, update, viewMode, setViewMode}) {
                     )}
                     <div style={{display:'flex',gap:8,marginTop:4}}>
                       <button className="btn btn-primary btn-sm" style={{flex:1}} onClick={saveAI}>{saved?'✓ Saved!':'💾 Save'}</button>
-                      <button className="btn btn-ghost btn-sm" onClick={testAI} disabled={testing}>{testing?'Testing…':'🔌 Test'}</button>
+                      <button className="btn btn-ghost btn-sm" onClick={testAI} disabled={testing}>{testing?'Testing...':'🔌 Test'}</button>
                     </div>
                   </div>
                 </div>
@@ -5090,7 +5097,7 @@ function SettingsPage({data, update, viewMode, setViewMode}) {
               <div className="card">
                 <div style={{fontWeight:700,fontSize:14,marginBottom:14}}>🕐 Time of Day</div>
                 <div style={{display:'flex',flexDirection:'column',gap:10}}>
-                  {[{v:'auto',l:'Auto (follows your timezone)',icon:'🔄'},{v:'day',l:'Always Day — bright & sunny',icon:'☀️'},{v:'evening',l:'Evening — warm golden light',icon:'🌅'},{v:'night',l:'Night — stars, fireflies, moonlight',icon:'🌙'}].map(t=>(
+                  {[{v:'auto',l:'Auto (follows your timezone)',icon:'🔄'},{v:'day',l:'Always Day -- bright & sunny',icon:'☀️'},{v:'evening',l:'Evening -- warm golden light',icon:'🌅'},{v:'night',l:'Night -- stars, fireflies, moonlight',icon:'🌙'}].map(t=>(
                     <div key={t.v} onClick={()=>setEnv({timeTracking:t.v==='auto',tod:t.v})}
                       style={{display:'flex',alignItems:'center',gap:10,padding:'10px 13px',borderRadius:10,border:`1.5px solid ${(env.tod||'auto')===t.v?'var(--accent)':'var(--border)'}`,background:(env.tod||'auto')===t.v?'color-mix(in srgb,var(--accent) 8%,white)':'var(--surface)',cursor:'pointer',transition:'all 0.15s'}}>
                       <span style={{fontSize:18}}>{t.icon}</span>
@@ -5286,10 +5293,10 @@ function SettingsPage({data, update, viewMode, setViewMode}) {
                 <div style={{fontFamily:'var(--font-h)',fontWeight:900,fontSize:24,marginBottom:4}}>OpsGarden v3</div>
                 <div style={{fontSize:13,color:'var(--text3)',marginBottom:16}}>Premium Personal Operations Platform</div>
                 <div style={{fontSize:13,color:'var(--text2)',lineHeight:1.8}}>
-                  <div>🌍 Work Mode · 🎮 Game Mode · 🌐 Browser Mode</div>
-                  <div>🤖 AI-powered · 🌿 Living Environment</div>
-                  <div>⚡ Automation Builder · 📊 Full CRM</div>
-                  <div style={{marginTop:12,fontSize:11,color:'var(--text3)'}}>Built with React · Firebase-ready · localStorage persistence</div>
+                  <div>🌍 Work Mode . 🎮 Game Mode . 🌐 Browser Mode</div>
+                  <div>🤖 AI-powered . 🌿 Living Environment</div>
+                  <div>⚡ Automation Builder . 📊 Full CRM</div>
+                  <div style={{marginTop:12,fontSize:11,color:'var(--text3)'}}>Built with React . Firebase-ready . localStorage persistence</div>
                 </div>
               </div>
             </div>
@@ -5305,18 +5312,18 @@ function SettingsPage({data, update, viewMode, setViewMode}) {
 function UpdatesLog() {
   const done = [
     {v:'v3.0',date:'2025-07',title:'Garden Dashboard with isometric park',desc:'KPI buildings, NPC characters, animated garden with trees, birds, deer, fireflies.'},
-    {v:'v3.0',date:'2025-07',title:'Mode Transition — Transformer + Nano-particle',desc:'Particles shatter and reform between Work/Game/Browser modes with color animation.'},
+    {v:'v3.0',date:'2025-07',title:'Mode Transition -- Transformer + Nano-particle',desc:'Particles shatter and reform between Work/Game/Browser modes with color animation.'},
     {v:'v3.0',date:'2025-07',title:'Living Environment Canvas',desc:'Day/night cycle, seasons (spring/summer/autumn/winter/rainy), animated wildlife.'},
-    {v:'v3.0',date:'2025-07',title:'AI Engine v3 — Streaming',desc:'Groq, Ollama, OpenRouter, Anthropic, OpenAI, LM Studio, Jan, Custom. Token-by-token streaming.'},
-    {v:'v3.0',date:'2025-07',title:'AI Panel — Work + Game mode',desc:'Multi-chat sessions, web search, quick actions, setup wizard, streaming messages.'},
+    {v:'v3.0',date:'2025-07',title:'AI Engine v3 -- Streaming',desc:'Groq, Ollama, OpenRouter, Anthropic, OpenAI, LM Studio, Jan, Custom. Token-by-token streaming.'},
+    {v:'v3.0',date:'2025-07',title:'AI Panel -- Work + Game mode',desc:'Multi-chat sessions, web search, quick actions, setup wizard, streaming messages.'},
     {v:'v3.0',date:'2025-07',title:'Automation Builder',desc:'Zapier/Make-style trigger → action flow builder with 8 triggers and 14 actions.'},
-    {v:'v3.0',date:'2025-07',title:'Full Tasks — List + Kanban',desc:'5-column kanban board, subtasks, priority filters, detail modal, due date tracking.'},
-    {v:'v3.0',date:'2025-07',title:'Settings — AI selector with setup guides',desc:'YouTube links, official links, per-provider fields, test connection button.'},
-    {v:'v3.0',date:'2025-07',title:'Settings — Environment tab',desc:'Season, time-of-day, real-world weather toggle, AI character picker, density control.'},
-    {v:'v3.0',date:'2025-07',title:'Settings — Integrations tab',desc:'GHL, Make, n8n, QuickBooks, Fillout, Slack, Sheets, Airtable, Gmail, Zapier.'},
+    {v:'v3.0',date:'2025-07',title:'Full Tasks -- List + Kanban',desc:'5-column kanban board, subtasks, priority filters, detail modal, due date tracking.'},
+    {v:'v3.0',date:'2025-07',title:'Settings -- AI selector with setup guides',desc:'YouTube links, official links, per-provider fields, test connection button.'},
+    {v:'v3.0',date:'2025-07',title:'Settings -- Environment tab',desc:'Season, time-of-day, real-world weather toggle, AI character picker, density control.'},
+    {v:'v3.0',date:'2025-07',title:'Settings -- Integrations tab',desc:'GHL, Make, n8n, QuickBooks, Fillout, Slack, Sheets, Airtable, Gmail, Zapier.'},
     {v:'v3.0',date:'2025-07',title:'Browser Mode',desc:'Persistent tabs, URL bar, new tab page with shortcuts, embedded iframe viewer.'},
-    {v:'v3.0',date:'2025-07',title:'Games — Ludo',desc:'4-player Ludo with D&D neon dungeon style, dice rolling, AI opponents.'},
-    {v:'v3.0',date:'2025-07',title:'Games — Memory Duel, TicTacToe, Reaction Race',desc:'AI vs Player with minimax AI, streaming banter, score tracking.'},
+    {v:'v3.0',date:'2025-07',title:'Games -- Ludo',desc:'4-player Ludo with D&D neon dungeon style, dice rolling, AI opponents.'},
+    {v:'v3.0',date:'2025-07',title:'Games -- Memory Duel, TicTacToe, Reaction Race',desc:'AI vs Player with minimax AI, streaming banter, score tracking.'},
     {v:'v3.0',date:'2025-07',title:'Firebase wiring',desc:'Auth, Firestore, Storage, Realtime DB imports ready. Config modal built in.'},
   ];
   const upcoming = [
@@ -5327,12 +5334,12 @@ function UpdatesLog() {
     {priority:'🟡 Medium',title:'AI cross-mode task execution',desc:'Ask AI in Game mode to do work tasks. Cross-mode reminders and scheduling.'},
     {priority:'🟡 Medium',title:'Team chat + DMs',desc:'Group channels, direct messages, @AI mentions, file sharing in chats.'},
     {priority:'🟡 Medium',title:'AI memory bank UI',desc:'Visual chat history, uploaded file library, persistent memory across sessions.'},
-    {priority:'🟡 Medium',title:'GardenWorld Terraria-style game',desc:'Full tile-based 2D world — mining, building, caves, inventory, gravity physics.'},
+    {priority:'🟡 Medium',title:'GardenWorld Terraria-style game',desc:'Full tile-based 2D world -- mining, building, caves, inventory, gravity physics.'},
     {priority:'🟡 Medium',title:'Ludo online multiplayer',desc:'Real players via Firebase Realtime DB. Room codes, invite links.'},
     {priority:'🟡 Medium',title:'CRM pipeline board (GHL-style)',desc:'Visual deal pipeline, contact scoring, follow-up sequences, email templates.'},
     {priority:'🟡 Medium',title:'Workflow execution engine',desc:'Actually run automations. Webhook listener, scheduler, action executor.'},
-    {priority:'🟢 Later',title:'World location culture themes',desc:'Platform transforms to match selected world location — art, buildings, culture, colors.'},
-    {priority:'🟢 Later',title:'Lightning/storm powers in dashboard',desc:'Strike NPCs with lightning, cause earthquakes, control weather — visual only destruction mode.'},
+    {priority:'🟢 Later',title:'World location culture themes',desc:'Platform transforms to match selected world location -- art, buildings, culture, colors.'},
+    {priority:'🟢 Later',title:'Lightning/storm powers in dashboard',desc:'Strike NPCs with lightning, cause earthquakes, control weather -- visual only destruction mode.'},
     {priority:'🟢 Later',title:'AI NPC interactions',desc:'Talk to client NPCs as if from another dimension. Bubble popups, AI responses in character.'},
     {priority:'🟢 Later',title:'Mobile responsive layout',desc:'Full mobile support with bottom navigation, swipe gestures, touch-friendly UI.'},
     {priority:'🟢 Later',title:'Word Speed Duel game',desc:'Type the word before the AI. Reaction + spelling combined with AI banter.'},
@@ -5614,7 +5621,7 @@ function BrowserMode({data, update}) {
             <div style={{fontFamily:'var(--font-h)',fontWeight:800,fontSize:18,color:'var(--b-text)'}}>This site can't be embedded</div>
             <div style={{fontSize:13,color:'var(--b-text3)',maxWidth:380,lineHeight:1.7}}>
               <strong>{activeTab.title}</strong> blocks embedding in other apps for security (X-Frame-Options / CSP).
-              This is set by the website itself — open it in a full browser tab instead.
+              This is set by the website itself -- open it in a full browser tab instead.
             </div>
             <a href={activeTab.url} target="_blank" rel="noreferrer" className="btn btn-primary" style={{textDecoration:'none'}}>↗ Open {activeTab.title} in New Tab</a>
             <button className="btn btn-ghost btn-sm" onClick={()=>{setBlocked(false);setLoading(true);setReloadKey(k=>k+1);clearTimeout(loadTimerRef.current);loadTimerRef.current=setTimeout(()=>{setLoading(false);setBlocked(true);},6000);}}>Try embedding anyway</button>
@@ -5651,7 +5658,7 @@ function BrowserMode({data, update}) {
   );
 }
 // ═══════════════════════════════════════════════════════════════
-// AUTH SCREEN — Firebase login (optional, can skip to local mode)
+// AUTH SCREEN -- Firebase login (optional, can skip to local mode)
 // ═══════════════════════════════════════════════════════════════
 function AuthScreen({onEnter}) {
   const [showFbSetup, setShowFbSetup] = useState(false);
@@ -5744,7 +5751,7 @@ function AuthScreen({onEnter}) {
           </form>
         ) : (
           <div style={{fontSize:13,color:'rgba(255,255,255,0.55)',lineHeight:1.8,textAlign:'center',marginBottom:10}}>
-            Connect Firebase for multi-user online access, or continue locally — all data stays in your browser.
+            Connect Firebase for multi-user online access, or continue locally -- all data stays in your browser.
           </div>
         )}
 
@@ -6027,7 +6034,7 @@ function App() {
               <div className="sidebar-footer">
                 <span className="status-dot"/>
                 {mode==='work' ? 'Work Mode' : mode==='game' ? 'Game Zone' : 'Browser Mode'}
-                <div style={{marginTop:3,opacity:0.6,fontSize:10}}>{season} · {tod}</div>
+                <div style={{marginTop:3,opacity:0.6,fontSize:10}}>{season} . {tod}</div>
               </div>
             </div>
           )}
@@ -6088,9 +6095,18 @@ function App() {
 // ═══════════════════════════════════════════════════════════════
 // MOUNT
 // ═══════════════════════════════════════════════════════════════
-const root = ReactDOM.createRoot(document.getElementById('root'));
-root.render(React.createElement(ErrorBoundary,null,React.createElement(App,null)));
-if(window.__hideLoader) window.__hideLoader();
+const root = try {
+    const root2 = ReactDOM.createRoot(document.getElementById('root'));
+    root2.render(React.createElement(ErrorBoundary,null,React.createElement(App,null)));
+    if(window.__hideLoader) window.__hideLoader();
+  } catch(mountErr) {
+    console.error('OpsGarden mount error:', mountErr);
+    var errDiv = document.createElement('div');
+    errDiv.style.cssText = 'position:fixed;inset:0;background:#fff8f8;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px;font-family:sans-serif;text-align:center;z-index:99999;';
+    errDiv.innerHTML = '<div style="font-size:36px;margin-bottom:16px">⚠️</div><h2 style="color:#c00;margin-bottom:12px">OpsGarden Startup Error</h2><pre style="background:#f5f5f5;padding:16px;border-radius:8px;max-width:600px;text-align:left;font-size:12px;overflow:auto;color:#333;">' + mountErr.message + '</pre><p style="color:#666;margin-top:12px;font-size:13px">Press F12 → Console for full details</p><button onclick="location.reload()" style="margin-top:16px;padding:12px 28px;background:#e85d04;color:white;border:none;border-radius:8px;font-size:15px;cursor:pointer;font-weight:700;">Retry</button>';
+    document.getElementById('app-loader').style.display='none';
+    document.body.appendChild(errDiv);
+  }
 </script>
 </body>
 </html>

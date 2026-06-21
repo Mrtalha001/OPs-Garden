@@ -4403,7 +4403,7 @@ function TicTacToe({onBack}) {
     if(!xIsNext||board[i]||over)return;
     const nb=[...board];nb[i]='X';setBoard(nb);
     const w=calcWinner(nb),draw=!w&&nb.every(c=>c);
-    if(w==='X'){setScores(s=>({...s,player:s.player+1}));setOver(true);setAiMsg(['Wait...I lost?! Bug! 🤔','Beginner's luck!','Well played... I demand rematch!'][Math.floor(Math.random()*3)]);}
+    if(w==='X'){setScores(s=>({...s,player:s.player+1}));setOver(true);setAiMsg(["Wait...I lost?! Bug! 🤔","Beginner's luck!","Well played... I demand rematch!"][Math.floor(Math.random()*3)]);}
     else if(draw){setScores(s=>({...s,draws:s.draws+1}));setOver(true);setAiMsg('Draw! Even match! 🤝');}
     else setXIsNext(false);
   };

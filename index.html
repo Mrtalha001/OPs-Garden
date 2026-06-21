@@ -6095,7 +6095,7 @@ function App() {
 // ═══════════════════════════════════════════════════════════════
 // MOUNT
 // ═══════════════════════════════════════════════════════════════
-const root = try {
+try {
     const root2 = ReactDOM.createRoot(document.getElementById('root'));
     root2.render(React.createElement(ErrorBoundary,null,React.createElement(App,null)));
     if(window.__hideLoader) window.__hideLoader();

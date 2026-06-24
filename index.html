@@ -756,6 +756,33 @@ body{
   overflow:hidden;transition:var(--trans-slow);
   position:relative;
 }
+.ai-panel{
+  width:var(--ai-panel-w);flex-shrink:0;
+  background:var(--surface2);
+  border-left:1px solid var(--border2);
+  display:flex;flex-direction:column;
+  overflow:hidden;
+  transition:width 0.28s cubic-bezier(.4,0,.2,1), opacity 0.2s ease;
+  position:relative;
+}
+.ai-panel.closed{
+  width:0;
+  border-left:none;
+  opacity:0;
+  pointer-events:none;
+}
+.main-content-inner{min-height:100%;}
+.ai-header{
+  padding:14px 16px 12px;border-bottom:1px solid var(--border);
+  display:flex;align-items:center;gap:10px;flex-shrink:0;
+}
+[data-mode="game"] .ai-header{border-bottom-color:var(--g-border2);}
+.ai-avatar-orb{
+  width:36px;height:36px;border-radius:10px;flex-shrink:0;
+  background:linear-gradient(135deg,var(--accent),var(--accent2,var(--accent)));
+  display:flex;align-items:center;justify-content:center;font-size:18px;
+  box-shadow:0 2px 10px color-mix(in srgb,var(--accent) 30%,transparent);
+}
 [data-mode="game"] .ai-panel{background:var(--g-surface2);border-left-color:rgba(155,53,224,0.2);}
 .ai-panel-hdr{
   padding:16px 18px 12px;border-bottom:1px solid var(--border);
@@ -1044,7 +1071,107 @@ body{
       <div style="width:8px;height:8px;border-radius:50%;background:#e85d04;animation:ldot 1.2s ease-in-out 0.4s infinite;"></div>
     </div>
     <div id="load-status" style="font-size:12px;color:#6b6b68;margin-top:4px;">Initializing platform...</div>
-    <style>@keyframes ldot{0%,80%,100%{transform:scale(0.6);opacity:0.4}40%{transform:scale(1);opacity:1}}</style>
+    <style>@keyframes ldot{0%,80%,100%{transform:scale(0.6);opacity:0.4}40%{transform:scale(1);opacity:1}}
+/* ═══ MISSING CLASSES — AI Panel ═══════════════════════════════ */
+.ai-messages{flex:1;overflow-y:auto;padding:14px 16px;display:flex;flex-direction:column;gap:10px;}
+.ai-messages::-webkit-scrollbar{width:3px;}
+.ai-messages::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px;}
+.ai-msg{max-width:88%;padding:9px 13px;border-radius:12px;font-size:13px;line-height:1.55;word-wrap:break-word;}
+.ai-msg.user{align-self:flex-end;background:var(--w-dark,#0f0f0e);color:white;border-radius:12px 12px 3px 12px;}
+[data-mode="game"] .ai-msg.user{background:linear-gradient(135deg,var(--g-crimson-d),var(--g-purple-d));}
+.ai-msg.assistant{align-self:flex-start;background:var(--bg);color:var(--text2);border:1px solid var(--border);border-radius:12px 12px 12px 3px;}
+.ai-msg.error{border-color:#ef4444;background:rgba(239,68,68,0.06);color:#c0392b;}
+.ai-input-row{display:flex;gap:8px;align-items:flex-end;padding:12px 16px;border-top:1px solid var(--border);flex-shrink:0;}
+.ai-input{flex:1;border:1px solid var(--border2);border-radius:10px;padding:9px 12px;font-size:13px;resize:none;font-family:var(--font);color:var(--text);background:var(--surface);max-height:100px;outline:none;transition:var(--trans);line-height:1.4;}
+.ai-input:focus{border-color:var(--accent);box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 12%,transparent);}
+[data-mode="game"] .ai-input{background:rgba(255,255,255,0.04);border-color:var(--g-border2);color:var(--g-text);}
+.ai-send-btn{width:36px;height:36px;border-radius:10px;background:var(--accent);color:white;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;transition:var(--trans);}
+.ai-send-btn:hover{transform:scale(1.06);}
+.ai-send-btn:disabled{opacity:0.4;cursor:default;transform:none;}
+.ai-badge{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:20px;font-size:9.5px;font-weight:800;background:#e8f7ef;color:#1a7a4a;}
+.ai-list-item{padding:8px 10px;border-radius:8px;cursor:pointer;font-size:12px;color:var(--text2);transition:var(--trans);display:flex;align-items:center;gap:8px;}
+.ai-list-item:hover{background:var(--bg);}
+.ai-list-item.active{background:color-mix(in srgb,var(--accent) 12%,var(--surface));color:var(--text);font-weight:600;}
+
+/* ═══ MISSING CLASSES — Auth Screen ════════════════════════════ */
+.auth-screen{min-height:100vh;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#ebebea,#e0dfdd);padding:24px;}
+.auth-card{background:#fff;border-radius:var(--r-lg);padding:36px 32px;max-width:380px;width:100%;box-shadow:0 24px 70px rgba(0,0,0,0.16);border:1px solid rgba(0,0,0,0.08);}
+.auth-logo{width:52px;height:52px;border-radius:12px;background:#0f0f0e;display:flex;align-items:center;justify-content:center;font-size:26px;margin:0 auto 16px;box-shadow:0 8px 24px rgba(0,0,0,0.2);}
+.auth-title{font-family:var(--font-h);font-weight:800;font-size:22px;text-align:center;color:#0f0f0e;margin-bottom:6px;}
+.auth-sub{font-size:12.5px;color:#6b6b68;text-align:center;margin-bottom:24px;}
+.auth-input{width:100%;padding:11px 14px;border:1.5px solid rgba(0,0,0,0.12);border-radius:10px;font-size:13.5px;font-family:var(--font);color:#0f0f0e;background:#f7f6f4;margin-bottom:12px;transition:var(--trans);box-sizing:border-box;}
+.auth-input:focus{outline:none;border-color:#e85d04;box-shadow:0 0 0 3px rgba(232,93,4,0.12);}
+.auth-btn{width:100%;padding:12px;border-radius:10px;background:#0f0f0e;color:white;border:none;font-size:14px;font-weight:700;cursor:pointer;transition:var(--trans);margin-top:4px;}
+.auth-btn:hover{background:#e85d04;}
+.auth-btn:disabled{opacity:0.5;cursor:default;}
+.auth-google-btn{width:100%;padding:11px;border-radius:10px;background:white;color:#3a3a38;border:1.5px solid rgba(0,0,0,0.12);font-size:13.5px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:var(--trans);margin-bottom:10px;box-sizing:border-box;}
+.auth-google-btn:hover{background:#f7f6f4;}
+.auth-divider{display:flex;align-items:center;gap:10px;margin:16px 0;font-size:11px;color:#9a9a96;}
+.auth-divider::before,.auth-divider::after{content:'';flex:1;height:1px;background:rgba(0,0,0,0.08);}
+.auth-link{color:#e85d04;cursor:pointer;font-weight:600;text-decoration:none;}
+.auth-error{background:#fdecea;color:#b02020;border:1px solid #f5c6c6;border-radius:8px;padding:9px 12px;font-size:12px;margin-bottom:12px;}
+.firebase-setup{background:#f7f6f4;border:1px solid rgba(0,0,0,0.08);border-radius:10px;padding:14px;margin-top:12px;font-size:11.5px;line-height:1.7;}
+
+/* ═══ MISSING CLASSES — Browser Chrome ═════════════════════════ */
+.browser-wrapper{display:flex;flex-direction:column;height:100%;background:var(--bg);}
+.browser-chrome-bar{display:flex;align-items:center;gap:6px;padding:6px 10px;background:var(--surface2);border-bottom:1px solid var(--border);flex-shrink:0;flex-wrap:wrap;}
+.browser-tab-item{display:flex;align-items:center;gap:6px;padding:5px 12px;border-radius:6px 6px 0 0;background:var(--bg);font-size:11.5px;color:var(--text2);cursor:pointer;max-width:160px;border:1px solid var(--border);border-bottom:none;transition:var(--trans);flex-shrink:0;}
+.browser-tab-item.active{background:var(--surface);color:var(--text);font-weight:600;}
+.tab-close{margin-left:4px;opacity:0.5;cursor:pointer;font-size:12px;padding:0 2px;}
+.tab-close:hover{opacity:1;color:#ef4444;}
+.browser-url-bar{display:flex;align-items:center;gap:8px;padding:7px 12px;background:var(--surface2);border-bottom:1px solid var(--border);flex-shrink:0;position:relative;}
+.url-nav-btn{width:28px;height:28px;border-radius:6px;background:var(--bg);border:1px solid var(--border2);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:13px;color:var(--text2);transition:var(--trans);flex-shrink:0;}
+.url-nav-btn:hover{border-color:var(--accent);color:var(--accent);}
+.url-input{flex:1;padding:7px 12px;border:1px solid var(--border2);border-radius:8px;font-size:12.5px;font-family:var(--font);color:var(--text);background:var(--bg);outline:none;transition:var(--trans);}
+.url-input:focus{border-color:var(--accent);}
+.url-suggestion-item{padding:8px 12px;cursor:pointer;display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--text2);transition:var(--trans);}
+.url-suggestion-item:hover{background:var(--bg2);}
+.sugg-type{font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:0.5px;margin-left:auto;flex-shrink:0;}
+.browser-frame{flex:1;position:relative;overflow:hidden;}
+.new-tab-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(90px,1fr));gap:14px;padding:32px;max-width:700px;margin:0 auto;}
+.new-tab-shortcut{display:flex;flex-direction:column;align-items:center;gap:8px;cursor:pointer;padding:10px;border-radius:10px;transition:var(--trans);}
+.new-tab-shortcut:hover{background:var(--surface2);}
+.site-icon{width:44px;height:44px;border-radius:12px;background:var(--surface2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:20px;}
+.site-name{font-size:10.5px;color:var(--text2);text-align:center;}
+.new-tab-btn{width:30px;height:30px;border-radius:7px;background:none;border:1px solid var(--border2);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px;color:var(--text3);transition:var(--trans);flex-shrink:0;}
+.new-tab-btn:hover{background:var(--bg2);}
+.bm-remove{margin-left:4px;opacity:0.4;cursor:pointer;font-size:11px;}
+.bm-remove:hover{opacity:1;color:#ef4444;}
+
+/* ═══ MISSING CLASSES — Settings Page ══════════════════════════ */
+.settings-nav{display:flex;flex-direction:column;gap:2px;min-width:180px;}
+.settings-nav-item{padding:9px 14px;border-radius:8px;font-size:12.5px;font-weight:600;color:var(--text2);cursor:pointer;transition:var(--trans);display:flex;align-items:center;gap:9px;}
+.settings-nav-item:hover{background:var(--bg2);}
+.settings-nav-item.active{background:#0f0f0e;color:white;}
+[data-mode="game"] .settings-nav-item.active{background:linear-gradient(135deg,var(--g-crimson),var(--g-purple));}
+.settings-content{flex:1;min-width:0;}
+
+/* ═══ MISSING CLASSES — Empty States, Generic ══════════════════ */
+.empty-state{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:48px 24px;text-align:center;color:var(--text3);}
+.empty-icon{font-size:40px;margin-bottom:12px;opacity:0.7;}
+.empty-title{font-size:14px;font-weight:600;color:var(--text2);margin-bottom:4px;}
+.decision-card{background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);padding:14px 16px;margin-bottom:10px;transition:var(--trans);}
+.decision-card:hover{box-shadow:var(--shadow2);border-color:var(--border2);}
+.checklist-item{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border);font-size:13px;}
+.badge-active{background:#eef2fb;color:#1a46b0;}
+.badge-inactive{background:#f0f0f2;color:#6b6b68;}
+.pri-high{color:#ef4444;}
+.pri-medium{color:#f59e0b;}
+.pri-low{color:#22c55e;}
+.notif-panel{position:absolute;top:calc(100% + 8px);right:0;z-index:800;background:var(--surface2);border:1px solid var(--border2);border-radius:var(--r-lg);box-shadow:var(--shadow2);width:300px;max-height:400px;overflow-y:auto;}
+.notif-item{padding:10px 14px;border-bottom:1px solid var(--border);font-size:12.5px;color:var(--text2);}
+.notif-item:hover{background:var(--bg2);}
+.tooltip{position:absolute;background:rgba(0,0,0,0.85);color:white;border-radius:6px;padding:5px 10px;font-size:11px;white-space:nowrap;pointer-events:none;z-index:100;backdrop-filter:blur(8px);}
+.yt-link{color:var(--accent);text-decoration:none;font-size:11.5px;font-weight:600;}
+.yt-link:hover{text-decoration:underline;}
+.code-block{background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:8px 12px;font-family:monospace;font-size:11.5px;color:var(--text2);white-space:pre-wrap;margin:6px 0;}
+.env-canvas-bg{position:absolute;inset:0;pointer-events:none;}
+
+.kanban-col-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
+.ai-badge-free{background:#e8f7ef;color:#1a7a4a;}
+.ai-badge-paid{background:#fdecea;color:#b02020;}
+.ai-badge-both{background:#eef2fb;color:#1a46b0;}
+</style>
   </div>
   <div id="app-error" style="display:none;position:fixed;inset:0;background:#fffaf8;align-items:center;justify-content:center;flex-direction:column;gap:12px;font-family:system-ui,sans-serif;padding:24px;text-align:center;">
     <div style="font-size:36px;">⚠️</div>
@@ -3950,28 +4077,94 @@ function GamesPage() {
   if(game==='snake')    return <SnakeGame    onBack={()=>setGame(null)}/>;
 
   const gameList=[
-    {id:'space',  icon:'🚀',title:'Space Defender', desc:'Wave-based arcade shooter -- blast invaders, dodge fire, survive the swarm!', color:'#00d4ff'},
-    {id:'snake',  icon:'🐍',title:'Snake Run',      desc:'Classic snake with neon glow. Eat, grow, avoid yourself!',            color:'#39ff14'},
-    {id:'ludo',    icon:'🎲',title:'Ludo Quest',     desc:'Classic Ludo with D&D dungeon style. Roll dice, move pieces, race to win!',  color:'#b44dff'},
-    {id:'memory',  icon:'🃏',title:'Memory Duel',    desc:'Race the AI to match all card pairs. It remembers what it has seen!',         color:'#00d4ff'},
-    {id:'tictac',  icon:'⭕',title:'Tic-Tac-Toe',    desc:'Play against the AI. It uses perfect minimax strategy -- can you win?',       color:'#39ff14'},
-    {id:'reaction',icon:'⚡',title:'Reaction Race',  desc:'Click faster than the AI when the signal fires. Pure reflexes!',            color:'#ffdd00'},
-    {id:'breathing',icon:'🫁',title:'Calm Breathing', desc:'Box breathing 4-4-6 with Sprout encouraging you every few cycles.',         color:'#7ab8d8'},
-    {id:'focus',   icon:'⏱️',title:'Focus Timer',    desc:'Pomodoro-style focus timer. AI checks in when your session ends.',          color:'#6ba362'},
+    {id:'space',  icon:'🚀',title:'Space Defender', desc:'Wave-based arcade shooter -- blast invaders, dodge fire, survive the swarm!', color:'#e0185a', players:'2.5k', tag:'Shooter'},
+    {id:'snake',  icon:'🐍',title:'Snake Run',      desc:'Classic snake with neon glow. Eat, grow, avoid yourself!',            color:'#39ff14', players:'1.8k', tag:'Arcade'},
+    {id:'ludo',    icon:'🎲',title:'Ludo Quest',     desc:'Classic Ludo with D&D dungeon style. Roll dice, move pieces, race to win!',  color:'#9b35e0', players:'3.1k', tag:'Strategy'},
+    {id:'memory',  icon:'🃏',title:'Memory Duel',    desc:'Race the AI to match all card pairs. It remembers what it has seen!',         color:'#00d4ff', players:'1.2k', tag:'Puzzle'},
+    {id:'tictac',  icon:'⭕',title:'Tic-Tac-Toe',    desc:'Play against the AI. It uses perfect minimax strategy -- can you win?',       color:'#ffb830', players:'980',  tag:'Classic'},
+    {id:'reaction',icon:'⚡',title:'Reaction Race',  desc:'Click faster than the AI when the signal fires. Pure reflexes!',            color:'#ffdd00', players:'1.5k', tag:'Reflex'},
+    {id:'breathing',icon:'🫁',title:'Calm Breathing', desc:'Box breathing 4-4-6 with Sprout encouraging you every few cycles.',         color:'#89b4fa', players:'620',  tag:'Wellness'},
+    {id:'focus',   icon:'⏱️',title:'Focus Timer',    desc:'Pomodoro-style focus timer. AI checks in when your session ends.',          color:'#a6e3a1', players:'740',  tag:'Productivity'},
   ];
+
+  const featured = gameList[0];
 
   return (
     <div>
-      <div style={{background:'linear-gradient(135deg,rgba(0,212,255,0.1),rgba(180,77,255,0.1))',borderRadius:'var(--r-lg)',padding:'20px 24px',marginBottom:22,border:'1.5px solid var(--border)'}}>
-        <div style={{fontFamily:'var(--font-h)',fontWeight:900,fontSize:20,color:'var(--text)',marginBottom:4}}>🎮 Game Zone</div>
-        <div style={{fontSize:13,color:'var(--text2)'}}>All games have AI companion Sprout who plays against you, reacts, and banters. Connect Groq or Ollama in Settings for full AI personality.</div>
+      {/* Hero banner — matches gaming dashboard reference */}
+      <div style={{
+        position:'relative',borderRadius:'var(--r-lg)',overflow:'hidden',marginBottom:20,
+        background:'linear-gradient(135deg,#1a0a2e 0%,#2a0f3a 50%,#1a0820 100%)',
+        border:'1px solid rgba(224,24,90,0.25)',padding:'28px 32px',
+        boxShadow:'0 20px 60px rgba(224,24,90,0.15), inset 0 1px 0 rgba(255,255,255,0.05)',
+      }}>
+        {/* floating particles bg */}
+        <div style={{position:'absolute',inset:0,opacity:0.5,pointerEvents:'none',
+          background:'radial-gradient(circle at 15% 20%, rgba(0,212,255,0.25) 0%, transparent 35%), radial-gradient(circle at 85% 15%, rgba(155,53,224,0.25) 0%, transparent 35%), radial-gradient(circle at 50% 90%, rgba(224,24,90,0.2) 0%, transparent 40%)'
+        }}/>
+        <div style={{position:'relative',zIndex:1,display:'flex',justifyContent:'space-between',alignItems:'flex-end',gap:24,flexWrap:'wrap'}}>
+          <div>
+            <div style={{display:'inline-flex',alignItems:'center',gap:6,background:'rgba(224,24,90,0.18)',border:'1px solid rgba(224,24,90,0.4)',borderRadius:20,padding:'3px 12px',fontSize:10.5,fontWeight:700,color:'#ff5090',marginBottom:14,letterSpacing:0.5}}>
+              <span>⚡</span> FEATURED
+            </div>
+            <div style={{fontFamily:'Orbitron,monospace',fontWeight:800,fontSize:30,color:'#fff',letterSpacing:'-0.5px',marginBottom:8,textShadow:'0 0 30px rgba(224,24,90,0.4)'}}>
+              {featured.title}
+            </div>
+            <div style={{fontSize:13,color:'rgba(255,255,255,0.6)',maxWidth:420,lineHeight:1.6,marginBottom:18}}>
+              {featured.desc}
+            </div>
+            <button className="btn btn-primary" onClick={()=>setGame(featured.id)} style={{padding:'10px 26px',fontSize:13}}>
+              ▶ Play Now
+            </button>
+          </div>
+          <div style={{fontSize:90,filter:'drop-shadow(0 10px 30px rgba(224,24,90,0.5))',opacity:0.9}}>
+            {featured.icon}
+          </div>
+        </div>
       </div>
-      <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(220px,1fr))',gap:14}}>
+
+      {/* Section header */}
+      <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:16}}>
+        <div style={{display:'flex',alignItems:'center',gap:10}}>
+          <span style={{width:3,height:18,background:'#e0185a',borderRadius:2,display:'inline-block'}}/>
+          <div style={{fontFamily:'Orbitron,monospace',fontWeight:700,fontSize:13,letterSpacing:1,color:'var(--text)'}}>ALL GAMES</div>
+        </div>
+        <div style={{fontSize:11,color:'var(--text3)',fontFamily:'Orbitron,monospace',letterSpacing:0.5}}>{gameList.length} TITLES · AI-POWERED</div>
+      </div>
+
+      {/* Game grid — styled cards */}
+      <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(230px,1fr))',gap:14}}>
         {gameList.map(g=>(
-          <div key={g.id} className="game-card" onClick={()=>setGame(g.id)} style={{borderTop:`3px solid ${g.color}`}}>
-            <div className="game-icon">{g.icon}</div>
-            <div className="game-title">{g.title}</div>
-            <div className="game-desc">{g.desc}</div>
+          <div key={g.id} onClick={()=>setGame(g.id)} style={{
+            position:'relative',cursor:'pointer',borderRadius:'var(--r-lg)',overflow:'hidden',
+            background:'var(--surface2)',border:'1px solid var(--border)',
+            transition:'var(--trans)',
+          }}
+          onMouseEnter={e=>{e.currentTarget.style.transform='translateY(-4px)';e.currentTarget.style.boxShadow=`0 16px 40px ${g.color}33`;e.currentTarget.style.borderColor=g.color+'66';}}
+          onMouseLeave={e=>{e.currentTarget.style.transform='none';e.currentTarget.style.boxShadow='none';e.currentTarget.style.borderColor='var(--border)';}}
+          >
+            {/* Top banner with icon */}
+            <div style={{
+              height:96,position:'relative',display:'flex',alignItems:'center',justifyContent:'center',
+              background:`linear-gradient(135deg, ${g.color}28, ${g.color}08)`,
+              borderBottom:`2px solid ${g.color}55`,
+            }}>
+              <div style={{fontSize:42,filter:`drop-shadow(0 6px 16px ${g.color}66)`}}>{g.icon}</div>
+              <div style={{position:'absolute',top:8,right:10,fontSize:9,fontWeight:700,color:'#fff',background:'rgba(0,0,0,0.4)',padding:'2px 8px',borderRadius:10,backdropFilter:'blur(4px)'}}>
+                👥 {g.players}
+              </div>
+              <div style={{position:'absolute',top:8,left:10,fontSize:9,fontWeight:700,color:g.color,background:'rgba(0,0,0,0.4)',padding:'2px 8px',borderRadius:10,backdropFilter:'blur(4px)'}}>
+                {g.tag}
+              </div>
+            </div>
+            {/* Info */}
+            <div style={{padding:'12px 14px 14px'}}>
+              <div style={{fontWeight:800,fontSize:13.5,color:'var(--text)',marginBottom:5,fontFamily:'var(--font-h)'}}>{g.title}</div>
+              <div style={{fontSize:11,color:'var(--text3)',lineHeight:1.5,marginBottom:10,minHeight:32}}>{g.desc}</div>
+              <button className="btn btn-sm" style={{width:'100%',background:g.color,color:'#fff',border:'none',fontWeight:700}}>
+                ▶ Play
+              </button>
+            </div>
           </div>
         ))}
       </div>
@@ -6083,10 +6276,10 @@ function App() {
               </div>
             </div>
           </div>
-        </div>
 
-        {/* AI Panel */}
-        <AIPanel open={aiOpen} onClose={()=>setAiOpen(false)} data={data} update={update} mode={mode}/>
+          {/* AI Panel — proper flex sibling inside middle-row */}
+          <AIPanel open={aiOpen} onClose={()=>setAiOpen(false)} data={data} update={update} mode={mode}/>
+        </div>
       </div>
     </AppCtx.Provider>
   );

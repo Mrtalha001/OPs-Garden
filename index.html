@@ -83,8 +83,9 @@ html,body,#root{height:100%;overflow:hidden;}
 /* ── BASE ───────────────────────────────────────────── */
 body{
   background:var(--bg); color:var(--text);
-  font-family:var(--font); font-size:14px;
+  font-family:var(--font); font-size:14.5px; line-height:1.5;
   transition:background 0.8s ease, color 0.4s ease;
+  -webkit-font-smoothing:antialiased;
 }
 [data-mode="work"] body{
   background-image:radial-gradient(rgba(0,0,0,0.05) 1px,transparent 0);
@@ -207,9 +208,9 @@ body{
 .nav-section-label{padding:12px 16px 4px;font-size:9px;font-weight:700;color:var(--text3);letter-spacing:1.8px;text-transform:uppercase;}
 [data-mode="game"] .nav-section-label{color:rgba(180,50,255,0.6);font-family:var(--font-g);letter-spacing:2px;}
 .nav-item{
-  display:flex;align-items:center;gap:10px;padding:8px 12px 8px 14px;
+  display:flex;align-items:center;gap:10px;padding:9px 12px 9px 14px;
   cursor:pointer;margin:1px 6px 1px 0;border-radius:0 8px 8px 0;
-  font-size:13px;font-weight:500;color:var(--text2);transition:var(--trans);position:relative;
+  font-size:13.5px;font-weight:500;color:var(--text2);transition:var(--trans);position:relative;line-height:1.3;
 }
 .nav-item:hover{background:var(--bg2);color:var(--text);}
 [data-mode="work"] .nav-item.active{background:var(--w-dark);color:white;font-weight:600;}
@@ -266,7 +267,7 @@ body{
 .kpi-hero-3d{transform-style:preserve-3d;transform:rotateX(7deg) translateZ(0);transition:transform 0.38s cubic-bezier(.34,1.4,.64,1);}
 .kpi-hero-3d:hover{transform:rotateX(0deg) translateZ(18px);}
 .kpi-number{font-family:var(--font-h);font-size:54px;font-weight:800;line-height:1;letter-spacing:-3px;color:var(--kpi-c,var(--accent));text-shadow:0 4px 20px color-mix(in srgb,var(--kpi-c,var(--accent)) 30%,transparent);}
-.kpi-label{font-size:9.5px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:var(--text3);margin-top:2px;}
+.kpi-label{font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:1.2px;color:var(--text3);margin-top:4px;line-height:1.4;}
 .kpi-sub{font-size:12px;color:var(--text3);margin-top:6px;}
 .kpi-accent-bar{position:absolute;bottom:0;left:0;right:0;height:3px;border-radius:0 0 var(--r) var(--r);background:linear-gradient(90deg,var(--kpi-c,var(--accent)),color-mix(in srgb,var(--kpi-c,var(--accent)) 60%,white));box-shadow:0 0 10px var(--kpi-c,var(--accent));}
 .kpi-popup-badge{position:absolute;top:-11px;left:14px;background:var(--kpi-c,var(--accent));color:white;font-size:9.5px;font-weight:800;padding:3px 10px;border-radius:20px;letter-spacing:0.5px;text-transform:uppercase;box-shadow:0 4px 14px color-mix(in srgb,var(--kpi-c,var(--accent)) 40%,transparent);z-index:10;}
@@ -284,7 +285,7 @@ body{
 /* ════════════════════════════════════════════════════════
    CARDS & COMPONENTS
    ════════════════════════════════════════════════════════ */
-.card{background:var(--surface2);border-radius:var(--r);border:1px solid var(--border);padding:18px 20px;box-shadow:var(--shadow);transition:var(--trans);}
+.card{background:var(--surface2);border-radius:var(--r);border:1px solid var(--border);padding:19px 21px;box-shadow:var(--shadow);transition:var(--trans);line-height:1.5;}
 .card:hover{box-shadow:var(--shadow2);border-color:var(--border2);}
 [data-mode="game"] .card{background:var(--g-surface);border-color:rgba(155,32,224,0.15);}
 [data-mode="game"] .card:hover{border-color:rgba(224,24,90,0.35);box-shadow:0 8px 40px rgba(224,24,90,0.12);}
@@ -320,7 +321,7 @@ body{
 [data-mode="game"] .badge-waiting{background:rgba(255,184,48,0.1);color:var(--g-gold);border:1px solid rgba(255,184,48,0.2);}
 
 /* Buttons */
-.btn{display:inline-flex;align-items:center;gap:7px;padding:8px 18px;border-radius:8px;font-size:12.5px;font-weight:600;cursor:pointer;border:1px solid transparent;transition:var(--trans);font-family:var(--font);white-space:nowrap;letter-spacing:0.2px;}
+.btn{display:inline-flex;align-items:center;gap:7px;padding:9px 18px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;border:1px solid transparent;transition:var(--trans);font-family:var(--font);white-space:nowrap;letter-spacing:0.2px;line-height:1.3;}
 [data-mode="work"] .btn-primary{background:var(--w-dark);color:white;box-shadow:0 2px 10px rgba(0,0,0,0.15);}
 [data-mode="work"] .btn-primary:hover{background:var(--w-orange);transform:translateY(-1px);box-shadow:0 6px 20px rgba(232,93,4,0.3);}
 .btn-primary{background:linear-gradient(135deg,var(--accent),var(--accent2,var(--accent)));color:white;box-shadow:var(--shadow);}
@@ -347,7 +348,7 @@ body{
 /* Forms */
 .form-group{margin-bottom:14px;}
 .form-label{font-size:11px;font-weight:700;color:var(--text2);display:block;margin-bottom:5px;text-transform:uppercase;letter-spacing:0.5px;}
-.form-input,.form-select,.form-textarea{width:100%;padding:8px 12px;border:1px solid var(--border2);border-radius:var(--r-sm);font-size:13px;font-family:var(--font);color:var(--text);background:var(--surface);transition:var(--trans);}
+.form-input,.form-select,.form-textarea{width:100%;padding:9px 12px;border:1px solid var(--border2);border-radius:var(--r-sm);font-size:13.5px;font-family:var(--font);color:var(--text);background:var(--surface);transition:var(--trans);line-height:1.4;}
 .form-input:focus,.form-select:focus,.form-textarea:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 14%,transparent);}
 [data-mode="game"] .form-input,[data-mode="game"] .form-select,[data-mode="game"] .form-textarea{background:rgba(255,255,255,0.04);border-color:var(--g-border2);color:var(--g-text);}
 .form-textarea{resize:vertical;min-height:76px;}
@@ -374,7 +375,7 @@ body{
 .data-table{width:100%;border-collapse:collapse;font-size:13px;}
 .data-table th{text-align:left;padding:9px 14px;font-size:9.5px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.8px;background:var(--bg2);border-bottom:1px solid var(--border2);}
 [data-mode="game"] .data-table th{background:rgba(255,255,255,0.03);}
-.data-table td{padding:11px 14px;border-bottom:1px solid var(--border);vertical-align:middle;}
+.data-table td{padding:12px 14px;border-bottom:1px solid var(--border);vertical-align:middle;line-height:1.5;}
 .data-table tr:hover td{background:var(--bg2);}
 
 /* Kanban */
@@ -396,7 +397,7 @@ body{
 
 /* Section headers */
 .section-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
-.section-title{font-family:var(--font-h);font-weight:700;font-size:14.5px;color:var(--text);}
+.section-title{font-family:var(--font-h);font-weight:700;font-size:15.5px;color:var(--text);line-height:1.3;}
 .detail-section-title{font-family:var(--font-h);font-weight:700;font-size:12.5px;color:var(--text2);margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:7px;}
 
 /* AI Panel */
@@ -413,7 +414,7 @@ body{
 .ai-messages,.chat-msgs{flex:1;overflow-y:auto;padding:14px 16px;display:flex;flex-direction:column;gap:10px;}
 .ai-messages::-webkit-scrollbar,.chat-msgs::-webkit-scrollbar{width:3px;}
 .ai-messages::-webkit-scrollbar-thumb,.chat-msgs::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px;}
-.ai-msg,.chat-msg{max-width:88%;padding:9px 13px;border-radius:12px;font-size:13px;line-height:1.55;word-wrap:break-word;}
+.ai-msg,.chat-msg{max-width:88%;padding:10px 14px;border-radius:12px;font-size:13.5px;line-height:1.6;word-wrap:break-word;}
 .ai-msg.user,.chat-msg.user{align-self:flex-end;background:var(--w-dark,#0f0f0e);color:white;border-radius:12px 12px 3px 12px;}
 [data-mode="game"] .ai-msg.user,[data-mode="game"] .chat-msg.user{background:linear-gradient(135deg,var(--g-crimson-d),var(--g-purple-d));}
 [data-mode="browser"] .ai-msg.user,[data-mode="browser"] .chat-msg.user{background:linear-gradient(135deg,#7a5db0,#4a7ad0);}
@@ -800,6 +801,7 @@ const SEED = {
   ],
   browserHistory:[],
   browserNotes:{},
+  trash:[],
   envSettings:{
     season:'spring',timeTracking:true,weatherMimic:false,
     location:'auto',customLocation:'',changeRate:720,
@@ -822,6 +824,22 @@ const SEED = {
 const LS_KEY = 'opsgarden_v3';
 const loadLocal = () => { try { const s=localStorage.getItem(LS_KEY); return s?JSON.parse(s):SEED; } catch { return SEED; } };
 const saveLocal = d => { try { localStorage.setItem(LS_KEY,JSON.stringify(d)); } catch {} };
+
+// ── Shared trash/recover helper ──
+// Moves an item to data.trash (tagged with its origin collection) and removes it from the live collection.
+function trashItem(data, update, collection, item, label) {
+  const trashed = {...item, _collection: collection, _label: label||item.name||item.title||item.text?.slice(0,40)||'Item', _deletedAt: Date.now()};
+  update('trash', [...(data.trash||[]), trashed]);
+  update(collection, (data[collection]||[]).filter(x=>x.id!==item.id));
+}
+function recoverItem(data, update, trashedItem) {
+  const { _collection, _label, _deletedAt, ...clean } = trashedItem;
+  update(_collection, [...(data[_collection]||[]), clean]);
+  update('trash', (data.trash||[]).filter(t=>t.id!==trashedItem.id));
+}
+function purgeTrashItem(data, update, trashedItem) {
+  update('trash', (data.trash||[]).filter(t=>t.id!==trashedItem.id));
+}
 
 // ═══════════════════════════════════════════════════════════════
 // AI ENGINE -- Streaming, Groq, Ollama, OpenRouter, Anthropic
@@ -2054,7 +2072,9 @@ function Garden3D({buildings, season, tod, onEnter}) {
   };
 
   return (
-    <div ref={mountRef} style={{width:'100%',height:'100%',position:'relative',cursor:'grab'}}>
+    <div style={{width:'100%',height:'100%',position:'relative',cursor:'grab'}}>
+      {/* Three.js gets its OWN isolated div that React never touches internally */}
+      <div ref={mountRef} style={{position:'absolute',inset:0}}/>
       {/* Hover tooltip */}
       {hoverInfo && !selected && (
         <div style={{position:'absolute',left:hoverInfo.x,top:hoverInfo.y,transform:'translate(-50%,-100%)',background:'rgba(0,0,0,0.78)',color:'white',borderRadius:10,padding:'6px 12px',fontSize:12,fontWeight:600,pointerEvents:'none',zIndex:5,backdropFilter:'blur(8px)',border:'1px solid rgba(255,255,255,0.18)',whiteSpace:'nowrap'}}>
@@ -2454,7 +2474,7 @@ function ClientsPage({data, update}) {
     update('clients',[...(data.clients||[]),nc]); setShowModal(false);
     setForm({name:'',company:'',email:'',phone:'',timezone:'',status:'Active',phase:'',riskLevel:'Low',notes:'',tags:''});
   };
-  const del = id => { if(window.confirm('Delete client?')) update('clients',(data.clients||[]).filter(c=>c.id!==id)); setSel(null); };
+  const del = id => { const c=(data.clients||[]).find(x=>x.id===id); if(c && window.confirm('Delete client "'+c.name+'"? You can recover it from Settings → Data & Backup within 30 days.')){ trashItem(data,update,'clients',c); setSel(null); } };
 
   const riskColor={High:'#e07a7a',Medium:'#e4b86a',Low:'#6dbfa0'};
 
@@ -2603,7 +2623,10 @@ function WorkflowsPage({data, update, openWorkflow}) {
                   <td><PriLabel p={wf.priority}/></td>
                   <td style={{fontSize:12,color:'var(--text2)',maxWidth:180}}>{wf.nextAction}</td>
                   <td onClick={e=>e.stopPropagation()}>
-                    <button className="btn btn-ghost btn-xs" onClick={()=>{setBuilderWf(wf);setView('builder');}}>⚙️ Edit</button>
+                    <div style={{display:'flex',gap:4}}>
+                      <button className="btn btn-ghost btn-xs" onClick={()=>{setBuilderWf(wf);setView('builder');}}>⚙️ Edit</button>
+                      <button className="btn btn-ghost btn-xs" style={{color:'#ef4444'}} onClick={()=>{ if(confirm('Delete "'+wf.name+'"? You can recover it from Trash in Data & Backup within 30 days.')){ const trashed={...wf,deletedAt:Date.now()}; update('trash',[...(data.trash||[]),trashed]); update('workflows',(data.workflows||[]).filter(w=>w.id!==wf.id)); } }}>🗑️</button>
+                    </div>
                   </td>
                 </tr>
               );
@@ -2663,8 +2686,8 @@ const ZAPIER_APP_LIBRARY = [
 
 function AutomationBuilder({data, update, onBack, workflow}) {
   const [name, setName]       = useState(workflow?.name||'New Automation');
-  const [trigger, setTrigger] = useState(null);
-  const [actions, setActions] = useState([]);
+  const [trigger, setTrigger] = useState(workflow?.trigger||null);
+  const [actions, setActions] = useState(workflow?.actions||[]);
   const [step, setStep]       = useState('trigger'); // trigger | actions | settings | test
   const [testLog, setTestLog] = useState([]);
   const [testing, setTesting] = useState(false);
@@ -2954,7 +2977,7 @@ function TasksPage({data, update}) {
     setForm({name:'',workflowId:'',clientId:'',priority:'Medium',status:'Not Started',owner:'',dueDate:'',blocker:'',nextAction:'',notes:'',tags:''});
   };
   const toggleDone = id => update('tasks',tasks.map(t=>t.id===id?{...t,status:t.status==='Complete'?'In Progress':'Complete'}:t));
-  const delTask = id => { update('tasks',tasks.filter(t=>t.id!==id)); setSelTask(null); };
+  const delTask = id => { const t=tasks.find(x=>x.id===id); if(t){ trashItem(data,update,'tasks',t); setSelTask(null); } };
 
   const KANBAN_COLS = ['Not Started','In Progress','Waiting','Blocked','Complete'];
   const colColors  = {'Not Started':'#b0b8c1','In Progress':'#7aaee0','Waiting':'#e4b86a','Blocked':'#e07a7a','Complete':'#6dbfa0'};
@@ -3168,7 +3191,7 @@ function NotesPage({data, update}) {
     setQuick('');
   };
   const togglePin = id => update('notes',notes.map(n=>n.id===id?{...n,pinned:!n.pinned}:n));
-  const del = id => update('notes',notes.filter(n=>n.id!==id));
+  const del = id => { const n=notes.find(x=>x.id===id); if(n) trashItem(data,update,'notes',n,n.text?.slice(0,40)); };
 
   const filtered = notes.filter(n=>{
     const matchType = filter==='All'||n.type===filter||( filter==='Pinned'&&n.pinned);
@@ -3248,7 +3271,7 @@ function DocsPage({data, update}) {
                   <td><span className="tag">{d.type}</span></td>
                   <td style={{fontSize:12,color:'var(--text3)'}}>{client?.name||'--'}</td>
                   <td style={{fontSize:12,color:'var(--text3)',maxWidth:200}}>{d.notes}</td>
-                  <td><button className="btn btn-danger btn-xs" onClick={()=>update('docs',docs.filter(x=>x.id!==d.id))}>✕</button></td>
+                  <td><button className="btn btn-danger btn-xs" onClick={()=>{ if(window.confirm('Delete "'+d.title+'"?')) trashItem(data,update,'docs',d,d.title); }}>✕</button></td>
                 </tr>
               );
             })}
@@ -3324,7 +3347,10 @@ function DecisionsPage({data, update}) {
               <div style={{textAlign:'right',flexShrink:0}}>
                 <div style={{marginBottom:8}}><span className={`badge badge-${d.decided?'done':'waiting'}`}>{d.decided?'✓ Decided':'Pending'}</span></div>
                 <div style={{fontSize:11,color:'var(--text3)',marginBottom:8}}>{d.date}<br/>{d.who}</div>
-                <button className="btn btn-ghost btn-xs" onClick={()=>toggleDecided(d.id)}>{d.decided?'↩ Reopen':'✅ Mark Decided'}</button>
+                <div style={{display:'flex',gap:4,justifyContent:'flex-end'}}>
+                  <button className="btn btn-ghost btn-xs" onClick={()=>toggleDecided(d.id)}>{d.decided?'↩ Reopen':'✅ Mark Decided'}</button>
+                  <button className="btn btn-ghost btn-xs" style={{color:'#ef4444'}} onClick={()=>{ if(window.confirm('Delete "'+d.title+'"?')) trashItem(data,update,'decisions',d,d.title); }}>🗑️</button>
+                </div>
               </div>
             </div>
           </div>
@@ -4567,9 +4593,9 @@ function SettingsPage({data, update, viewMode, setViewMode}) {
   const setEnv = patch => update('envSettings', {...env, ...patch});
 
   return (
-    <div style={{display:'flex', height:'calc(100vh - 108px)', overflow:'hidden'}}>
+    <div style={{display:'flex', minHeight:'calc(100vh - 108px)'}}>
       {/* Settings sidebar */}
-      <div className="settings-nav">
+      <div className="settings-nav" style={{position:'sticky',top:0,alignSelf:'flex-start',maxHeight:'calc(100vh - 108px)',overflowY:'auto'}}>
         <div style={{padding:'10px 16px 6px', fontSize:10, fontWeight:700, color:'var(--text3)', letterSpacing:1, textTransform:'uppercase'}}>Settings</div>
         {settingsTabs.map(t => (
           <div key={t.id} className={`settings-nav-item ${tab===t.id?'active':''}`} onClick={() => setTab(t.id)}>
@@ -4579,7 +4605,7 @@ function SettingsPage({data, update, viewMode, setViewMode}) {
       </div>
 
       {/* Settings content */}
-      <div className="settings-content">
+      <div className="settings-content" style={{paddingBottom:60}}>
 
         {/* ── AI ENGINE TAB ── */}
         {tab==='ai' && (
@@ -4884,6 +4910,29 @@ function SettingsPage({data, update, viewMode, setViewMode}) {
                   📤 Import JSON Backup
                   <input type="file" accept=".json" style={{display:'none'}} onChange={e=>{const file=e.target.files[0];if(!file)return;const r=new FileReader();r.onload=ev=>{try{const d=JSON.parse(ev.target.result);Object.keys(d).forEach(k=>update(k,d[k]));alert('✅ Data imported successfully!');}catch{alert('❌ Invalid JSON file');}};r.readAsText(file);}}/>
                 </label>
+              </div>
+              <div className="card" style={{gridColumn:'1/-1'}}>
+                <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:14}}>
+                  <div style={{fontWeight:700,fontSize:14}}>🗑️ Trash <span style={{fontWeight:500,color:'var(--text3)',fontSize:12}}>-- {(data.trash||[]).length} item{(data.trash||[]).length!==1?'s':''}</span></div>
+                  {(data.trash||[]).length>0 &&
+                    <button className="btn btn-ghost btn-xs" style={{color:'#ef4444'}} onClick={()=>{ if(window.confirm('Permanently delete all '+(data.trash||[]).length+' items in trash? This cannot be undone.')) update('trash',[]); }}>Empty Trash</button>
+                  }
+                </div>
+                {(data.trash||[]).length===0 ? (
+                  <div style={{textAlign:'center',padding:'20px 0',color:'var(--text3)',fontSize:13}}>Trash is empty. Deleted clients, tasks, notes, docs, decisions, and automations show up here for recovery.</div>
+                ) : (
+                  <div style={{display:'flex',flexDirection:'column',gap:6,maxHeight:320,overflowY:'auto'}}>
+                    {(data.trash||[]).slice().reverse().map(t=>(
+                      <div key={t.id} style={{display:'flex',alignItems:'center',gap:10,padding:'9px 12px',background:'var(--bg)',borderRadius:8,border:'1px solid var(--border)'}}>
+                        <span className="tag" style={{textTransform:'capitalize',flexShrink:0}}>{t._collection}</span>
+                        <div style={{flex:1,minWidth:0,fontSize:12.5,fontWeight:600,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{t._label}</div>
+                        <div style={{fontSize:10.5,color:'var(--text3)',flexShrink:0}}>{new Date(t._deletedAt).toLocaleDateString()}</div>
+                        <button className="btn btn-ghost btn-xs" onClick={()=>recoverItem(data,update,t)}>↩ Recover</button>
+                        <button className="btn btn-ghost btn-xs" style={{color:'#ef4444'}} onClick={()=>{ if(window.confirm('Permanently delete this item?')) purgeTrashItem(data,update,t); }}>✕</button>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
               <div className="card" style={{gridColumn:'1/-1'}}>
                 <div style={{fontWeight:700,fontSize:14,marginBottom:10,color:'#c05040'}}>⚠️ Danger Zone</div>

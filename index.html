@@ -37,7 +37,7 @@ html,body,#root{height:100%;overflow:hidden;}
   --shadow2:0 4px 24px rgba(0,0,0,0.11),0 1px 4px rgba(0,0,0,0.07);
   --shadow3:0 12px 48px rgba(0,0,0,0.18);
   --font:'Space Grotesk',system-ui,sans-serif;
-  --font-h:'Syne',system-ui,sans-serif;
+  --font-h:'Space Grotesk',system-ui,sans-serif;
   --font-g:'Orbitron',monospace;
   --font-g2:'Exo 2',sans-serif;
   --r:10px; --r-sm:6px; --r-lg:16px;
@@ -146,7 +146,7 @@ body{
 @keyframes gemPulse{0%,100%{box-shadow:0 0 0 0 rgba(224,24,90,0.35)}50%{box-shadow:0 0 18px 4px rgba(224,24,90,0.2)}}
 [data-mode="browser"] .brand-gem{background:linear-gradient(135deg,var(--b-mauve),var(--b-blue));}
 
-.brand-name{font-family:var(--font-h);font-weight:800;font-size:17px;color:var(--text);letter-spacing:-0.3px;}
+.brand-name{font-family:var(--font-h);font-weight:800;font-size:17px;line-height:1.3;color:var(--text);letter-spacing:-0.3px;}
 [data-mode="game"] .brand-name{font-family:var(--font-g);font-size:13px;letter-spacing:3px;color:var(--g-text);text-shadow:0 0 20px rgba(224,24,90,0.5);}
 
 /* Mode toggle pills */
@@ -236,7 +236,7 @@ body{
   display:flex;align-items:center;padding:0 22px;gap:12px;flex-shrink:0;z-index:10;position:relative;
 }
 [data-mode="game"] .topbar{background:rgba(8,5,18,0.9);border-bottom-color:var(--g-border2);backdrop-filter:blur(10px);}
-.topbar-title{font-family:var(--font-h);font-weight:700;font-size:15px;color:var(--text);}
+.topbar-title{font-family:var(--font-h);font-weight:700;font-size:16px;line-height:1.3;color:var(--text);}
 [data-mode="game"] .topbar-title{font-family:var(--font-g);font-size:12px;letter-spacing:2px;color:var(--g-text);text-shadow:0 0 15px rgba(224,24,90,0.4);}
 
 /* ════════════════════════════════════════════════════════
@@ -359,7 +359,7 @@ body{
 .modal{background:var(--surface2);border-radius:var(--r-lg);box-shadow:0 32px 80px rgba(0,0,0,0.35);max-width:700px;width:100%;max-height:90vh;overflow-y:auto;animation:slideUp 0.2s cubic-bezier(.4,0,.2,1);border:1px solid var(--border2);}
 [data-mode="game"] .modal{background:var(--g-surface2);border-color:rgba(155,32,224,0.3);box-shadow:0 32px 80px rgba(0,0,0,0.6),0 0 60px rgba(155,32,224,0.1);}
 .modal-hdr{display:flex;align-items:center;justify-content:space-between;padding:20px 22px 0;}
-.modal-title{font-family:var(--font-h);font-weight:800;font-size:17px;}
+.modal-title{font-family:var(--font-h);font-weight:800;font-size:18px;line-height:1.3;}
 .modal-body{padding:16px 22px 24px;}
 .modal-close{background:none;border:none;font-size:18px;cursor:pointer;color:var(--text3);padding:4px 8px;border-radius:6px;transition:var(--trans);}
 .modal-close:hover{background:var(--bg2);}
@@ -802,6 +802,17 @@ const SEED = {
   browserHistory:[],
   browserNotes:{},
   trash:[],
+  automations:[
+    {id:'auto1', name:'New Lead → Slack Alert', active:true, runCount:14, lastRun:Date.now()-3600000, createdAt:Date.now()-864000000,
+      trigger:{id:'new_client',label:'New Client',icon:'👤',desc:'When a client is added'},
+      actions:[{id:'a1',label:'Slack Message',icon:'💬',desc:'Post to a Slack channel',platform:'Slack'}]},
+    {id:'auto2', name:'Task Complete → Notify + Log', active:true, runCount:38, lastRun:Date.now()-7200000, createdAt:Date.now()-1728000000,
+      trigger:{id:'task_done',label:'Task Complete',icon:'🎯',desc:'When a task is marked done'},
+      actions:[{id:'a2',label:'Notify User',icon:'🔔',desc:'Send in-app notification',platform:'Internal'},{id:'a3',label:'Add Note',icon:'📝',desc:'Add a note to workspace',platform:'Internal'}]},
+    {id:'auto3', name:'Zapier -- Overdue Invoice Chase', active:false, runCount:0, lastRun:null, createdAt:Date.now()-172800000,
+      trigger:{id:'zapier_trigger',label:'Zapier Catch Hook',icon:'⚡',desc:'Triggered by any Zapier Zap',platform:'Zapier'},
+      actions:[{id:'a4',label:'Send Email',icon:'📧',desc:'Send via Gmail/SMTP',platform:'Gmail'},{id:'a5',label:'GHL Add Tag',icon:'🏷️',desc:'Tag a GHL contact',platform:'GHL'}]},
+  ],
   envSettings:{
     season:'spring',timeTracking:true,weatherMimic:false,
     location:'auto',customLocation:'',changeRate:720,
@@ -2582,59 +2593,109 @@ function ClientsPage({data, update}) {
 }
 
 // ── Workflows / Automation Builder ─────────────────────────────
-function WorkflowsPage({data, update, openWorkflow}) {
+function AutomationsPage({data, update}) {
   const [view, setView] = useState('list'); // list | builder
-  const [filter, setFilter] = useState('All');
-  const [builderWf, setBuilderWf] = useState(null);
-  const statuses=['All','In Progress','Testing','Waiting','Blocked','Complete','Not Started'];
-  const filtered = filter==='All'?(data.workflows||[]):(data.workflows||[]).filter(w=>w.status===filter);
+  const [builderAuto, setBuilderAuto] = useState(null);
+  const automations = data.automations||[];
 
-  if(view==='builder') return <AutomationBuilder data={data} update={update} onBack={()=>setView('list')} workflow={builderWf}/>;
+  if(view==='builder') return <AutomationBuilder data={data} update={update} onBack={()=>setView('list')} workflow={builderAuto}/>;
+
+  const toggleActive = (id) => update('automations', automations.map(a=>a.id===id?{...a,active:!a.active}:a));
+  const runNow = (id) => {
+    update('automations', automations.map(a=>a.id===id?{...a,runCount:(a.runCount||0)+1,lastRun:Date.now()}:a));
+  };
 
   return (
     <div>
-      <div style={{background:'linear-gradient(135deg,color-mix(in srgb,var(--accent) 8%,white),color-mix(in srgb,var(--accent2) 6%,white))',borderRadius:'var(--r-lg)',padding:'16px 20px',marginBottom:18,border:'1.5px solid var(--border)'}}>
-        <div style={{fontFamily:'var(--font-h)',fontWeight:900,fontSize:18,marginBottom:3}}>⚡ Automations</div>
-        <div style={{fontSize:12.5,color:'var(--text2)'}}>Build, manage, and run automations -- internal actions and external platform integrations (GHL, Make, n8n, Zapier, and more).</div>
-      </div>
-      <div style={{display:'flex',gap:8,marginBottom:16,alignItems:'center',flexWrap:'wrap'}}>
-        <div style={{display:'flex',gap:6,flex:1,flexWrap:'wrap'}}>
-          {statuses.map(s=><button key={s} className={`btn btn-sm ${filter===s?'btn-primary':'btn-ghost'}`} onClick={()=>setFilter(s)}>{s}</button>)}
+      {/* Hero header -- Zapier/Make style */}
+      <div style={{
+        background:'linear-gradient(135deg,var(--w-dark,#0f0f0e) 0%,#1a1a18 100%)',
+        borderRadius:'var(--r-lg)',padding:'26px 28px',marginBottom:20,color:'white',position:'relative',overflow:'hidden',
+      }}>
+        <div style={{position:'absolute',inset:0,opacity:0.5,pointerEvents:'none',
+          background:'radial-gradient(circle at 90% 10%,rgba(232,93,4,0.25) 0%,transparent 45%)'}}/>
+        <div style={{position:'relative',zIndex:1,display:'flex',justifyContent:'space-between',alignItems:'center',flexWrap:'wrap',gap:16}}>
+          <div>
+            <div style={{fontFamily:'var(--font-h)',fontWeight:800,fontSize:24,marginBottom:6}}>⚡ Automations</div>
+            <div style={{fontSize:13,opacity:0.7,maxWidth:440,lineHeight:1.6}}>
+              Build trigger → action workflows that connect OpsGarden to GHL, Make, n8n, Zapier, Slack, Gmail, and more. Just like Zapier or Make -- when something happens, do something automatically.
+            </div>
+          </div>
+          <button className="btn btn-primary" style={{padding:'12px 24px',fontSize:14}} onClick={()=>{setBuilderAuto(null);setView('builder');}}>+ Create Zap</button>
         </div>
-        <button className="btn btn-primary" onClick={()=>{setBuilderWf(null);setView('builder');}}>⚡ New Automation</button>
       </div>
-      <div className="card">
-        <table className="data-table">
-          <thead><tr><th>Automation</th><th>Client</th><th>Status</th><th>Progress</th><th>Priority</th><th>Next Action</th><th></th></tr></thead>
-          <tbody>
-            {filtered.map(wf=>{
-              const client=(data.clients||[]).find(c=>c.id===wf.clientId);
-              return (
-                <tr key={wf.id} style={{cursor:'pointer'}} onClick={()=>openWorkflow(wf)}>
-                  <td><div style={{fontWeight:700,fontSize:13}}>{wf.name}</div><div style={{fontSize:11,color:'var(--text3)',marginTop:2}}>{wf.summary?.slice(0,55)}...</div></td>
-                  <td style={{fontSize:12,color:'var(--text2)'}}>{client?.name||'--'}</td>
-                  <td><StatusBadge status={wf.status}/></td>
-                  <td style={{minWidth:100}}>
-                    <div style={{display:'flex',alignItems:'center',gap:8}}>
-                      <div style={{flex:1}}><ProgBar pct={wf.progress}/></div>
-                      <span style={{fontSize:11,color:'var(--text3)',width:30}}>{wf.progress}%</span>
-                    </div>
-                  </td>
-                  <td><PriLabel p={wf.priority}/></td>
-                  <td style={{fontSize:12,color:'var(--text2)',maxWidth:180}}>{wf.nextAction}</td>
-                  <td onClick={e=>e.stopPropagation()}>
-                    <div style={{display:'flex',gap:4}}>
-                      <button className="btn btn-ghost btn-xs" onClick={()=>{setBuilderWf(wf);setView('builder');}}>⚙️ Edit</button>
-                      <button className="btn btn-ghost btn-xs" style={{color:'#ef4444'}} onClick={()=>{ if(confirm('Delete "'+wf.name+'"? You can recover it from Trash in Data & Backup within 30 days.')){ const trashed={...wf,deletedAt:Date.now()}; update('trash',[...(data.trash||[]),trashed]); update('workflows',(data.workflows||[]).filter(w=>w.id!==wf.id)); } }}>🗑️</button>
-                    </div>
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
-        {filtered.length===0&&<div style={{textAlign:'center',padding:30,color:'var(--text3)'}}>No workflows found</div>}
+
+      {/* Stats row */}
+      <div style={{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:12,marginBottom:20}}>
+        {[
+          {label:'Total Zaps',   val:automations.length, c:'var(--accent)'},
+          {label:'Active',      val:automations.filter(a=>a.active).length, c:'#22c55e'},
+          {label:'Total Runs',  val:automations.reduce((s,a)=>s+(a.runCount||0),0), c:'#6366f1'},
+          {label:'Paused',      val:automations.filter(a=>!a.active).length, c:'#f59e0b'},
+        ].map(s=>(
+          <div key={s.label} className="stat-card" style={{'--sc':s.c}}>
+            <div className="stat-label">{s.label}</div>
+            <div className="stat-value" style={{color:s.c}}>{s.val}</div>
+          </div>
+        ))}
       </div>
+
+      {/* Zap list */}
+      {automations.length===0 ? (
+        <div className="empty-state">
+          <div className="empty-icon">⚡</div>
+          <div className="empty-title">No automations yet</div>
+          <div style={{fontSize:12,marginBottom:16}}>Create your first trigger → action automation, like Zapier or Make.</div>
+          <button className="btn btn-primary" onClick={()=>{setBuilderAuto(null);setView('builder');}}>+ Create Your First Zap</button>
+        </div>
+      ) : (
+        <div style={{display:'flex',flexDirection:'column',gap:10}}>
+          {automations.map(a=>(
+            <div key={a.id} className="card" style={{padding:'16px 20px'}}>
+              <div style={{display:'flex',alignItems:'center',gap:16,flexWrap:'wrap'}}>
+                {/* Toggle */}
+                <div onClick={()=>toggleActive(a.id)} style={{
+                  width:38,height:22,borderRadius:20,cursor:'pointer',flexShrink:0,position:'relative',
+                  background:a.active?'#22c55e':'var(--border2)',transition:'var(--trans)',
+                }}>
+                  <div style={{position:'absolute',top:2,left:a.active?18:2,width:18,height:18,borderRadius:'50%',background:'white',transition:'var(--trans)',boxShadow:'0 1px 3px rgba(0,0,0,0.3)'}}/>
+                </div>
+
+                {/* Trigger → Actions chain visual */}
+                <div style={{flex:1,minWidth:260,display:'flex',alignItems:'center',gap:8,flexWrap:'wrap'}}>
+                  <div style={{display:'flex',alignItems:'center',gap:6,padding:'6px 12px',background:'var(--bg)',borderRadius:20,border:'1px solid var(--border2)'}}>
+                    <span style={{fontSize:15}}>{a.trigger?.icon||'⚡'}</span>
+                    <span style={{fontSize:12,fontWeight:700}}>{a.trigger?.label||'No trigger'}</span>
+                  </div>
+                  {(a.actions||[]).map((act,i)=>(
+                    <React.Fragment key={act.id||i}>
+                      <span style={{color:'var(--text3)',fontSize:13}}>→</span>
+                      <div style={{display:'flex',alignItems:'center',gap:6,padding:'6px 12px',background:'var(--surface)',borderRadius:20,border:'1px solid var(--border)'}}>
+                        <span style={{fontSize:15}}>{act.icon}</span>
+                        <span style={{fontSize:12,fontWeight:600,color:'var(--text2)'}}>{act.label}</span>
+                      </div>
+                    </React.Fragment>
+                  ))}
+                </div>
+
+                {/* Meta */}
+                <div style={{textAlign:'right',flexShrink:0,fontSize:11,color:'var(--text3)'}}>
+                  <div>{a.runCount||0} run{(a.runCount||0)!==1?'s':''}</div>
+                  <div>{a.lastRun?new Date(a.lastRun).toLocaleDateString():'Never run'}</div>
+                </div>
+
+                {/* Actions */}
+                <div style={{display:'flex',gap:6,flexShrink:0}}>
+                  <button className="btn btn-ghost btn-xs" onClick={()=>runNow(a.id)}>▶ Run</button>
+                  <button className="btn btn-ghost btn-xs" onClick={()=>{setBuilderAuto(a);setView('builder');}}>⚙️ Edit</button>
+                  <button className="btn btn-ghost btn-xs" style={{color:'#ef4444'}} onClick={()=>{ if(confirm('Delete "'+a.name+'"?')) trashItem(data,update,'automations',a,a.name); }}>🗑️</button>
+                </div>
+              </div>
+              <div style={{marginTop:8,fontSize:13,fontWeight:700,color:'var(--text)'}}>{a.name}</div>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
@@ -2723,19 +2784,15 @@ function AutomationBuilder({data, update, onBack, workflow}) {
 
   const save = () => {
     if(!trigger) return alert('Add a trigger first!');
-    const wfData={
-      id:workflow?.id||'wf'+Date.now(),
-      name, status:'Active', progress:10, priority:'Medium', urgency:'Low',
-      clientId:workflow?.clientId||(data.clients?.[0]?.id||''),
-      summary:`Automation: ${trigger.label} → ${actions.map(a=>a.label).join(' → ')}`,
-      platformTo:'OpsGarden', platformFrom:'Manual',
-      nextAction:'Monitor automation', tags:['Automation'],
+    const autoData={
+      id:workflow?.id||'auto'+Date.now(),
+      name, active:true, runCount:workflow?.runCount||0, lastRun:workflow?.lastRun||null,
+      createdAt:workflow?.createdAt||Date.now(),
       trigger, actions,
-      ...workflow,
     };
-    const existing=(data.workflows||[]).find(w=>w.id===wfData.id);
-    if(existing) update('workflows',(data.workflows||[]).map(w=>w.id===wfData.id?wfData:w));
-    else update('workflows',[...(data.workflows||[]),wfData]);
+    const existing=(data.automations||[]).find(w=>w.id===autoData.id);
+    if(existing) update('automations',(data.automations||[]).map(w=>w.id===autoData.id?autoData:w));
+    else update('automations',[...(data.automations||[]),autoData]);
     setSaved(true); setTimeout(()=>{setSaved(false);onBack();},1000);
   };
 
@@ -2997,7 +3054,7 @@ function TasksPage({data, update}) {
         {[{l:'Total',v:stats.total,c:'var(--accent)'},{l:'Open',v:stats.open,c:'var(--progress)'},{l:'High Priority',v:stats.high,c:'#e07a7a'},{l:'Complete',v:stats.done,c:'#6dbfa0'},{l:'Blocked',v:stats.blocked,c:'#e07a7a'}].map(s=>(
           <div key={s.l} style={{background:'var(--surface)',borderRadius:10,padding:'10px 16px',border:'1.5px solid var(--border)',minWidth:90,boxShadow:'var(--shadow)'}}>
             <div style={{fontSize:10,color:'var(--text3)',fontWeight:700,textTransform:'uppercase',letterSpacing:0.6,marginBottom:4}}>{s.l}</div>
-            <div style={{fontFamily:'var(--font-h)',fontWeight:900,fontSize:24,color:s.c}}>{v}</div>
+            <div style={{fontFamily:'var(--font-h)',fontWeight:900,fontSize:24,color:s.c}}>{s.v}</div>
           </div>
         ))}
       </div>
@@ -3322,9 +3379,25 @@ function DecisionsPage({data, update}) {
     setShowModal(false); setForm({title:'',current:'',options:'',reason:'',decided:false,who:'',impact:''});
   };
   const toggleDecided = id => update('decisions',decisions.map(d=>d.id===id?{...d,decided:!d.decided}:d));
+  const [dtab, setDtab] = useState('decisions');
+  const initiatives = data.workflows||[];
 
   return (
     <div>
+      <div className="tabs">
+        <div className={`tab ${dtab==='decisions'?'active':''}`} onClick={()=>setDtab('decisions')}>⚖️ Decisions</div>
+        <div className={`tab ${dtab==='initiatives'?'active':''}`} onClick={()=>setDtab('initiatives')}>📌 Initiatives <span className="tag" style={{marginLeft:4}}>{initiatives.length}</span></div>
+      </div>
+
+      {dtab==='initiatives' ? (
+        <div>
+          <div style={{fontSize:12,color:'var(--text3)',marginBottom:16,lineHeight:1.6}}>
+            Client initiatives being tracked -- status, progress, next action, and what's blocking them. Not real automations; for those, see the <strong>Automations</strong> section.
+          </div>
+          <WorkflowInitiativesList data={data} update={update}/>
+        </div>
+      ) : (
+      <div>
       <div style={{display:'flex',justifyContent:'flex-end',marginBottom:16}}>
         <button className="btn btn-primary" onClick={()=>setShowModal(true)}>+ Log Decision</button>
       </div>
@@ -3383,10 +3456,37 @@ function DecisionsPage({data, update}) {
         </div>
       )}
     </div>
+    )}
+    </div>
   );
 }
 
-// ── Workflow Detail Page ───────────────────────────────────────
+// ── Workflow Initiatives List (embedded inside Decisions page) ──
+function WorkflowInitiativesList({data, update}) {
+  const wfs = data.workflows||[];
+  const [openWf, setOpenWf] = useState(null);
+  if(openWf) return <WorkflowDetailPage workflow={openWf} data={data} update={update} onBack={()=>setOpenWf(null)}/>;
+  if(wfs.length===0) return <div className="empty-state"><div className="empty-icon">📌</div><div className="empty-title">No initiatives yet</div><div style={{fontSize:12}}>Client initiatives you're tracking will show up here.</div></div>;
+  return (
+    <table className="data-table">
+      <thead><tr><th>Initiative</th><th>Status</th><th>Progress</th><th>Priority</th><th>Next Action</th><th></th></tr></thead>
+      <tbody>
+        {wfs.map(wf=>(
+          <tr key={wf.id} style={{cursor:'pointer'}} onClick={()=>setOpenWf(wf)}>
+            <td style={{fontWeight:700}}>{wf.name}</td>
+            <td><StatusBadge status={wf.status}/></td>
+            <td style={{minWidth:100}}><ProgBar pct={wf.progress}/></td>
+            <td><PriLabel p={wf.priority}/></td>
+            <td style={{fontSize:12,color:'var(--text3)'}}>{wf.nextAction?.slice(0,40)}</td>
+            <td onClick={e=>e.stopPropagation()}>
+              <button className="btn btn-ghost btn-xs" style={{color:'#ef4444'}} onClick={()=>{ if(confirm('Delete "'+wf.name+'"?')) trashItem(data,update,'workflows',wf,wf.name); }}>🗑️</button>
+            </td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  );
+}
 function WorkflowDetailPage({workflow:wfInit, data, update, onBack}) {
   const [wf, setWf] = useState(wfInit);
   const [tab, setTab] = useState('overview');
@@ -5546,7 +5646,7 @@ function App() {
     switch(page) {
       case 'dashboard': return <GardenDashboard data={data} openWorkflow={wf=>setSelectedWf(wf)} setPage={setPage} mode={mode} season={season} tod={tod}/>;
       case 'clients':   return <ClientsPage data={data} update={update}/>;
-      case 'automations': return <WorkflowsPage data={data} update={update} openWorkflow={wf=>setSelectedWf(wf)}/>;
+      case 'automations': return <AutomationsPage data={data} update={update}/>;
       case 'tasks':     return <TasksPage data={data} update={update}/>;
       case 'notes':     return <NotesPage data={data} update={update}/>;
       case 'docs':      return <DocsPage data={data} update={update}/>;
